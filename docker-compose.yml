@@ -17,8 +17,8 @@ services:
       - "80:80"
     networks:
       - network
-#    depends_on:
-#       - keycloak
+    depends_on:
+       - keycloak
       
   keycloak:
     container_name: ModuleBankAppKeycloak

@@ -1,0 +1,39 @@
+﻿networks:
+  network:
+    driver: bridge
+    
+services:
+    
+  api:
+    container_name: ModulBankAPI
+    image: modulebank.api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://*:80
+    build:
+      context: .
+      dockerfile: ModuleBankApp.API/Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - network
+#    depends_on:
+#       - keycloak
+      
+  keycloak:
+    container_name: ModuleBankAppKeycloak
+    image: quay.io/keycloak/keycloak:latest
+    volumes:
+      - ./scripts/keycloak_setup.sh:/opt/keycloak/keycloak_setup.sh
+    entrypoint: ["/bin/bash", "/opt/keycloak/keycloak_setup.sh"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: keycloak
+      KC_HTTP_ENABLED: "true"
+      KC_STRICT_HTTPS: "false"
+       
+    ports:
+      - "8080:8080"
+    networks:
+      - network

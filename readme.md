@@ -21,7 +21,7 @@ docker-compose up --build
 # Swagger
 
 ```
-http://localhost/swagger/index.html
+http://localhost/swagger
 ```
 
 # Тестовые данные

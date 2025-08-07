@@ -3,13 +3,13 @@ namespace ModuleBankApp.API.Features.Transactions.TransferBetweenAccount;
 /// <summary>
 /// Модель передачи данных транзакции по счётам.
 /// </summary>
-public class TransactionTransferDto
+public sealed class TransactionTransferDto
 {
     
     /// <summary>
     /// Идентификатор счета
     /// </summary>
-    public Guid AccountId { get; set; }
+    public required Guid AccountId { get; set; }
 
     /// <summary>
     /// Cчёт контрагента, которая заполняется только для внутренних переводов между счетами.
@@ -20,17 +20,17 @@ public class TransactionTransferDto
     /// <summary>
     /// Валюта
     /// </summary>
-    public string Currency { get; set; } = string.Empty;
+    public required string Currency { get; set; } = string.Empty;
 
     /// <summary>
     /// Сумма транзакции
     /// </summary>
-    public decimal Amount { get; set; }
+    public required decimal Amount { get; set; }
 
     /// <summary>
     /// Тип транзакции
     /// </summary>
-    public TransactionType Type { get; set; }
+    public required TransactionType Type { get; set; }
 
     /// <summary>
     /// Описание транзакции

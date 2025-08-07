@@ -3,17 +3,17 @@ namespace ModuleBankApp.API.Features.Accounts.EditAccount;
 /// <summary>
 /// Модель передачи данных при редактировании счета.
 /// </summary>
-public class EditAccountDto
+public sealed class EditAccountDto
 {
     /// <summary>
-    /// Id .
+    /// Id
     /// </summary>
-    public Guid Id { get; set; }
+    public required Guid Id { get; set; }
     
     /// <summary>
     /// Тип счета (перечисление).
     /// </summary>
-    public AccountType Type { get; set; }
+    public required AccountType Type { get; set; }
     
     /// <summary>
     /// Валюта
@@ -23,7 +23,7 @@ public class EditAccountDto
     /// <summary>
     /// Баланс
     /// </summary>
-    public decimal Balance { get; set; }
+    public required decimal Balance { get; set; }
 
     /// <summary>
     /// Процентная ставка

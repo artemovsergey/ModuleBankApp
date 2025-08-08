@@ -1,11 +1,14 @@
 ﻿networks:
   network:
     driver: bridge
-    
+
+volumes:
+  postgres_data:
+  
 services:
     
   api:
-    container_name: ModulBankAPI
+    container_name: ModulBankAppAPI
     image: modulebank.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
@@ -19,6 +22,24 @@ services:
       - network
     depends_on:
        - keycloak
+  db:
+    image: postgres:latest
+    container_name: ModuleBankAppPostgreSQL
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: ModuleBankAppDatabase
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - network
       
   keycloak:
     container_name: ModuleBankAppKeycloak

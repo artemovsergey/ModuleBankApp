@@ -10,7 +10,11 @@
 ![usecase.drawio.png](images/usecase.drawio.png)
 
 
-# Запуск
+# Запуск локально
+
+```dotnet run -- project ModuleBankApp.API ```
+
+# Запуск в docker
 
 ```
 docker-compose up --build

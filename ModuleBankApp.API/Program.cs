@@ -1,7 +1,10 @@
 using System.Reflection;
 using FluentValidation;
 using MediatR;
+using MediatR.Pipeline;
+using Microsoft.EntityFrameworkCore;
 using ModuleBankApp.API.Behaviors;
+using ModuleBankApp.API.Data;
 using ModuleBankApp.API.Data.Interfaces;
 using ModuleBankApp.API.Data.Repositories;
 using ModuleBankApp.API.Extensions;
@@ -20,12 +23,17 @@ builder.Services.AddAuthServices(config);
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
+builder.Services.AddTransient(typeof(IRequestPreProcessor<>), typeof(LoggingBehavior<>));
+
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
 builder.Services.AddSingleton<IAccountRepository, AccountMemoryRepository>();
 builder.Services.AddSingleton<ITransactionRepository, TransactionMemoryRepository>();
+
+builder.Services.AddDbContext<ModuleBankAppContext>();
 
 builder.Services.AddSingleton<IAuthService, AuthService>();
 
@@ -46,6 +54,14 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+if (app.Environment.IsProduction())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
+    dbContext.Database.EnsureDeleted();
+    dbContext.Database.Migrate();
+}
 
 app.UseCors("AllowAll");
 app.UseAuthentication();

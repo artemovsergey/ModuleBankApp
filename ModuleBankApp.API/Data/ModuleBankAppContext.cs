@@ -5,19 +5,25 @@ using ModuleBankApp.API.Features.Transactions;
 
 namespace ModuleBankApp.API.Data;
 
-public class ModuleBankAppContext(IConfiguration config) : DbContext
+public class ModuleBankAppContext : DbContext
 {
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public ModuleBankAppContext(DbContextOptions<ModuleBankAppContext> opt)
+        : base(opt)
     {
-        optionsBuilder.UseNpgsql(config.GetConnectionString("PostgreSQL"));
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new AccountMapping());
+        // Автоматическая установка расширения при первой миграции
+        modelBuilder.HasPostgresExtension("btree_gist");
+
+        modelBuilder.ApplyConfiguration(new AccountConfiguration());
+        modelBuilder.ApplyConfiguration(new TransactionConfiguration());
+
         base.OnModelCreating(modelBuilder);
     }
 }

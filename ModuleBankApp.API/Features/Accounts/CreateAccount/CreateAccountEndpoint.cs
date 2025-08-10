@@ -1,11 +1,24 @@
 using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Features.Accounts.CreateAccount;
 
 public static class CreateAccountEndpoint
 {
+    private static AuthorizationPolicy _authorizationPolicy =>
+        new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .RequireClaim("feature", "createaccount")
+            .Build();
+    
+    private static AuthorizationPolicy _authorizationPolicyAction =>
+        new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .RequireClaim("scope", "write")
+            .Build();
+    
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapPost("/account", async (
@@ -36,7 +49,7 @@ public static class CreateAccountEndpoint
         .Produces<MbResult<Account>>(StatusCodes.Status400BadRequest)
         .Produces(StatusCodes.Status401Unauthorized)
         .RequireAuthorization();
-        
+        // .RequireAuthorization(_authorizationPolicy);
         
         return app;
     }

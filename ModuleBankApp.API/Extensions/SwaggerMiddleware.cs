@@ -9,7 +9,6 @@ public static class SwaggerMiddleware
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "Банковские счета v1");
-            
         });
 
         return app;

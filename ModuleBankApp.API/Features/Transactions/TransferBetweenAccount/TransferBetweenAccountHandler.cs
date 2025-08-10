@@ -7,23 +7,11 @@ namespace ModuleBankApp.API.Features.Transactions.TransferBetweenAccount;
 public class TransferBetweenAccountHandler(
     ITransactionRepository repoTransaction,
     IAccountRepository repoAccount,
-    ILogger<TransferBetweenAccountHandler> logger) : IRequestHandler<TransferBetweenAccountRequest, MbResult<Transaction>>
+    ILogger<TransferBetweenAccountHandler> logger) : IRequestHandler<TransferBetweenAccountRequest, MbResult<TransactionDto>>
 {
-    public async Task<MbResult<Transaction>> Handle(TransferBetweenAccountRequest request, CancellationToken ct)
+    public async Task<MbResult<TransactionDto>> Handle(TransferBetweenAccountRequest request, CancellationToken ct)
     {
-        var t = new Transaction()
-        {
-            Id = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
-            Type = request.TransactionDto.Type,
-            
-            AccountId = request.TransactionDto.AccountId,
-            CounterPartyAccountId = request.TransactionDto.CounterPartyAccountId,
-            
-            Amount = request.TransactionDto.Amount,
-            Currency = request.TransactionDto.Currency,
-            Description = request.TransactionDto.Description ?? ""
-        };
+        var t = request.TransactionDto.ToEntity();
         
         // изменяем аккаунт отравителя
         var accountSender = await repoAccount.GetAccounById(t.AccountId);
@@ -37,6 +25,6 @@ public class TransferBetweenAccountHandler(
         
         var result = await repoTransaction.RegisterTransaction(t);
         logger.LogWarning($"Creating transfer between account {accountSender.Id} и {accountReceiver.Id}", request.ClaimsId);
-        return MbResult<Transaction>.Success(result);
+        return MbResult<TransactionDto>.Success(result.ToDto());
     }
 }

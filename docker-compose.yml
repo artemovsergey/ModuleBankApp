@@ -22,6 +22,7 @@ services:
       - network
     depends_on:
        - keycloak
+       - db
   db:
     image: postgres:latest
     container_name: ModuleBankAppPostgreSQL

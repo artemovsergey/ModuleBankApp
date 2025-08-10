@@ -9,6 +9,7 @@ using ModuleBankApp.API.Data.Interfaces;
 using ModuleBankApp.API.Data.Repositories;
 using ModuleBankApp.API.Extensions;
 using ModuleBankApp.API.Features.Auth;
+using ModuleBankApp.API.Metrics;
 using ModuleBankApp.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,7 +23,9 @@ builder.Services.AddSerializeServices();
 builder.Services.AddAuthServices(config);
 
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
+        .AddOpenBehavior(typeof(HandlePerformancemetricBehavior<,>))
+);
 
 builder.Services.AddTransient(typeof(IRequestPreProcessor<>), typeof(LoggingBehavior<>));
 
@@ -30,11 +33,13 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
-builder.Services.AddSingleton<IAccountRepository, AccountMemoryRepository>();
-builder.Services.AddSingleton<ITransactionRepository, TransactionMemoryRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
-builder.Services.AddDbContext<ModuleBankAppContext>();
+builder.Services.AddDbContext<ModuleBankAppContext>(o => 
+    o.UseNpgsql(config.GetConnectionString("PostgreSQL")));
 
+builder.Services.AddSingleton<HandlePerformancemetric>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -59,7 +64,12 @@ if (app.Environment.IsProduction())
 {
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
-    dbContext.Database.EnsureDeleted();
+    dbContext.Database.Migrate();
+}
+else
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
     dbContext.Database.Migrate();
 }
 

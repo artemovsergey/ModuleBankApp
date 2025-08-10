@@ -26,7 +26,7 @@ public static class RegisterTransactionEndpoint
             var response = await mediator.Send(request);
             
             return response.IsSuccess 
-                ? Results.Created($"/transaction/{response.Value.Id}", response.Value) 
+                ? Results.Created("", response.Value) 
                 : Results.BadRequest(response.Error);
         })
         .WithTags("Транзакции по счетам")

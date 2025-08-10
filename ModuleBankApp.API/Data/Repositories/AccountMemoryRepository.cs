@@ -46,6 +46,11 @@ public class AccountMemoryRepository : IAccountRepository
         return await Task.FromResult(account!);
     }
 
+    public Task<Account> UpdateAccount(Account acc, Guid accountId)
+    {
+        throw new NotImplementedException();
+    }
+    
     public async Task<Account> RemoveAccount(Guid id)
     {
         var acc = _accounts.FirstOrDefault(a => a.Id == id);

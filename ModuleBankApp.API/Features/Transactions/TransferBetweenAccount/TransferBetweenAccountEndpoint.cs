@@ -9,7 +9,7 @@ public static class TransferBetweenAccountEndpoint
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapPost("/transaction/transfer", async (
-                TransactionTransferDto transactionDto,
+                TransactionDto transactionDto,
                 IMediator mediator,
                 ClaimsPrincipal user
                 ) =>
@@ -26,7 +26,7 @@ public static class TransferBetweenAccountEndpoint
             var response = await mediator.Send(request);
             
             return response.IsSuccess 
-                ? Results.Created($"/transaction/{response.Value.Id}", response.Value) 
+                ? Results.Created("", response.Value) 
                 : Results.BadRequest(response.Error);
         })
         .WithTags("Транзакции по счетам")

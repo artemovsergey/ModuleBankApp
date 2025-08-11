@@ -54,7 +54,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasIndex(a => new { a.Type, a.Currency })
             .HasDatabaseName("IX_Accounts_Type_Currency");
 
-        builder.HasData(GetSampleAccounts());
+        //builder.HasData(GetSampleAccounts());
     }
 
     private static IEnumerable<Account> GetSampleAccounts()

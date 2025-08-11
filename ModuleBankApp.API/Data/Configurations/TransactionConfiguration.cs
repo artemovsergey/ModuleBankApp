@@ -59,7 +59,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         builder.HasIndex(t => new { t.Type, t.Currency })
             .HasDatabaseName("IX_Transactions_Type_Currency");
 
-        builder.HasData(GetSampleTransactions());
+        //builder.HasData(GetSampleTransactions());
     }
 
     private static IEnumerable<Transaction> GetSampleTransactions()

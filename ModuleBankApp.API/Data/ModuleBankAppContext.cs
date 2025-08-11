@@ -16,6 +16,12 @@ public class ModuleBankAppContext : DbContext
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
+    public async Task AccrueInterestAsync(Guid accountId)
+    {
+        var sql = "CALL public.accrue_interest({0})";
+        await Database.ExecuteSqlRawAsync(sql, accountId);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Автоматическая установка расширения при первой миграции

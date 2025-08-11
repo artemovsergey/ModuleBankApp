@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace ModuleBankApp.API.Migrations
 {
     /// <inheritdoc />
@@ -62,32 +60,6 @@ namespace ModuleBankApp.API.Migrations
                         principalTable: "Accounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                schema: "public",
-                table: "Accounts",
-                columns: new[] { "Id", "Balance", "ClosedAt", "Currency", "InterestRate", "OwnerId", "Type" },
-                values: new object[,]
-                {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), 1500.00m, null, "USD", null, new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Checking" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), 5000.00m, null, "EUR", 3.5m, new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Deposit" },
-                    { new Guid("33333333-3333-3333-3333-333333333333"), -250.00m, null, "USD", 15.0m, new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), "Credit" },
-                    { new Guid("44444444-4444-4444-4444-444444444444"), 3200.50m, null, "GBP", null, new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), "Checking" },
-                    { new Guid("55555555-5555-5555-5555-555555555555"), 10000.00m, null, "USD", 4.2m, new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"), "Deposit" }
-                });
-
-            migrationBuilder.InsertData(
-                schema: "public",
-                table: "Transactions",
-                columns: new[] { "Id", "AccountId", "Amount", "CounterPartyAccountId", "Currency", "Description", "Type" },
-                values: new object[,]
-                {
-                    { new Guid("01010101-0101-0101-0101-010101010101"), new Guid("11111111-1111-1111-1111-111111111111"), 100.00m, new Guid("22222222-2222-2222-2222-222222222222"), "USD", "Перевод на депозитный счет", "Debit" },
-                    { new Guid("02020202-0202-0202-0202-020202020202"), new Guid("22222222-2222-2222-2222-222222222222"), 50.00m, null, "EUR", "Пополнение через терминал", "Credit" },
-                    { new Guid("03030303-0303-0303-0303-030303030303"), new Guid("33333333-3333-3333-3333-333333333333"), 200.00m, new Guid("44444444-4444-4444-4444-444444444444"), "USD", "Погашение кредита", "Credit" },
-                    { new Guid("04040404-0404-0404-0404-040404040404"), new Guid("44444444-4444-4444-4444-444444444444"), 75.50m, null, "GBP", "Оплата услуг", "Debit" },
-                    { new Guid("05050505-0505-0505-0505-050505050505"), new Guid("55555555-5555-5555-5555-555555555555"), 500.00m, null, "USD", "Начисление процентов", "Credit" }
                 });
 
             migrationBuilder.CreateIndex(

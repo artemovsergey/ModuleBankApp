@@ -9,6 +9,7 @@ using ModuleBankApp.API.Data.Interfaces;
 using ModuleBankApp.API.Data.Repositories;
 using ModuleBankApp.API.Extensions;
 using ModuleBankApp.API.Features.Auth;
+using ModuleBankApp.API.Handlers;
 using ModuleBankApp.API.Metrics;
 using ModuleBankApp.API.Services;
 
@@ -60,17 +61,15 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+
 if (app.Environment.IsProduction())
 {
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
+    dbContext.Database.EnsureDeleted();
     dbContext.Database.Migrate();
-}
-else
-{
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
-    dbContext.Database.Migrate();
+    var sql = File.ReadAllText("Data/Procedures/accrue_interest.sql");
+    await dbContext.Database.ExecuteSqlRawAsync(sql);
 }
 
 app.UseCors("AllowAll");
@@ -81,4 +80,11 @@ app.UseLoginEndpoint(config);
 app.UseEndpointsRegister();
 
 app.UseSwaggerMiddleware();
+
+app.MapPost("/test-accrue-interest", async (Guid accountId, IMediator mediator) =>
+{
+    var result = await mediator.Send(new AccrueInterestRequest(accountId));
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+});
+
 app.Run();

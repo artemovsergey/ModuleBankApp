@@ -19,4 +19,6 @@ RUN dotnet publish "ModuleBankApp.API.csproj" -c $BUILD_CONFIGURATION -o /app/pu
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+COPY ./ModuleBankApp.API/Data/Procedures/accrue_interest.sql /app/Data/Procedures/accrue_interest.sql
 ENTRYPOINT ["dotnet", "ModuleBankApp.API.dll"]

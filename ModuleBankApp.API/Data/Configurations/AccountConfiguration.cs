@@ -41,6 +41,10 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(a => a.OwnerId)
             .IsRequired();
 
+        builder.Property<uint>("xmin")
+            .IsRowVersion()
+            .HasColumnName("xmin");
+
         builder.HasMany(a => a.Transactions)
             .WithOne()
             .HasForeignKey(t => t.AccountId)

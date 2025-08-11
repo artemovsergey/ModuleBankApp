@@ -52,6 +52,11 @@ public class Account
     /// Владелец счета
     /// </summary>
     public Guid OwnerId { get; set; }
+
+    /// <summary>
+    /// concurrency-token для оптимистичной блокировки (PostgreSQL xmin)
+    /// </summary>
+    public uint xmin { get; set; }
 }
 
 public enum AccountType

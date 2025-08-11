@@ -24,6 +24,8 @@ public static class TransferBetweenAccountEndpoint
             
             var request = new TransferBetweenAccountRequest(transactionDto, ownerId);
             var response = await mediator.Send(request);
+
+            if (response.Error == "Conflict") return Results.Conflict("Операция не может быть выполнена из-за конфликта данных. Пожалуйста, повторите попытку позже.");
             
             return response.IsSuccess 
                 ? Results.Created("", response.Value) 

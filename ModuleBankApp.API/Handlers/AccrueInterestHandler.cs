@@ -1,15 +1,16 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ModuleBankApp.API.Data;
+using ModuleBankApp.API.Features.Accounts;
 using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Handlers;
 
-public record AccrueInterestRequest(Guid AccountId) : IRequest<MbResult<bool>>;
+public record AccrueInterestRequest() : IRequest<MbResult<bool>>;
 
-public class AccrueInterestHandler(
+public class AccrueInterestForAllHandler(
     ModuleBankAppContext db,
-    ILogger<AccrueInterestHandler> logger
+    ILogger<AccrueInterestForAllHandler> logger
 ) : IRequestHandler<AccrueInterestRequest, MbResult<bool>>
 {
     public async Task<MbResult<bool>> Handle(AccrueInterestRequest request, CancellationToken ct)
@@ -18,20 +19,28 @@ public class AccrueInterestHandler(
 
         try
         {
-            await db.Database.ExecuteSqlRawAsync(
-                "CALL public.accrue_interest({0})",
-                request.AccountId
-            );
+            var accountIds = await db.Accounts
+                .Where(a => a.Type == AccountType.Deposit && a.InterestRate != null)
+                .Select(a => a.Id)
+                .ToListAsync(ct);
+
+            foreach (var id in accountIds)
+            {
+                await db.Database.ExecuteSqlRawAsync(
+                    "CALL public.accrue_interest({0})",
+                    id
+                );
+            }
 
             await transaction.CommitAsync(ct);
 
-            logger.LogInformation("Interest accrued for account {AccountId}", request.AccountId);
+            logger.LogInformation("Interest accrued for {Count} accounts", accountIds.Count);
             return MbResult<bool>.Success(true);
         }
         catch (Exception ex)
         {
             await transaction.RollbackAsync(ct);
-            logger.LogError(ex, "Error accruing interest for account {AccountId}", request.AccountId);
+            logger.LogError(ex, "Error accruing interest for all accounts");
             return MbResult<bool>.Failure("Ошибка начисления процентов");
         }
     }

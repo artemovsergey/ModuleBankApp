@@ -12,6 +12,10 @@ using ModuleBankApp.API.Features.Auth;
 using ModuleBankApp.API.Handlers;
 using ModuleBankApp.API.Metrics;
 using ModuleBankApp.API.Services;
+using Hangfire;
+using Hangfire.PostgreSql;
+using ModuleBankApp.API.Filters;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +50,6 @@ builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 
-
 builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
@@ -58,6 +61,14 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
+
+builder.Services.AddHangfire(x => x.UsePostgreSqlStorage(options =>
+{
+    options.UseNpgsqlConnection(config.GetConnectionString("HangfirePostgreSQL"));
+}));
+
+builder.Services.AddHangfireServer();
+builder.Services.AddTransient<InterestJobService>();
 
 var app = builder.Build();
 
@@ -81,10 +92,27 @@ app.UseEndpointsRegister();
 
 app.UseSwaggerMiddleware();
 
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
+
 app.MapPost("/test-accrue-interest", async (Guid accountId, IMediator mediator) =>
 {
-    var result = await mediator.Send(new AccrueInterestRequest(accountId));
+    var result = await mediator.Send(new AccrueInterestRequest());
     return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
 });
+
+app.MapPost("/test-cron-job", () =>
+{
+    RecurringJob.TriggerJob("accrue-interest-job");
+    return Results.Ok("Cron job triggered");
+});
+
+RecurringJob.AddOrUpdate<InterestJobService>(
+    "accrue-interest-job",
+    job => job.AccrueInterest(),
+    Cron.Daily);
+
 
 app.Run();

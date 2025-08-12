@@ -41,7 +41,7 @@ builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
-builder.Services.AddDbContext<ModuleBankAppContext>(o => 
+builder.Services.AddDbContext<ModuleBankAppContext>(o =>
     o.UseNpgsql(config.GetConnectionString("PostgreSQL")));
 
 builder.Services.AddSingleton<HandlePerformancemetric>();
@@ -62,12 +62,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 builder.Services.AddHangfire(x => x.UsePostgreSqlStorage(options =>
 {
     options.UseNpgsqlConnection(config.GetConnectionString("HangfirePostgreSQL"));
 }));
 
 builder.Services.AddHangfireServer();
+
+
 builder.Services.AddTransient<InterestJobService>();
 
 var app = builder.Build();
@@ -84,18 +87,24 @@ if (app.Environment.IsProduction())
 }
 
 app.UseCors("AllowAll");
-app.UseAuthentication();
-app.UseAuthorization();
+
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.UseLoginEndpoint(config);
 app.UseEndpointsRegister();
 
 app.UseSwaggerMiddleware();
 
+
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = new[] { new HangfireAuthorizationFilter() }
 });
+
 
 app.MapPost("/test-accrue-interest", async (Guid accountId, IMediator mediator) =>
 {
@@ -103,11 +112,13 @@ app.MapPost("/test-accrue-interest", async (Guid accountId, IMediator mediator) 
     return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
 });
 
+
 app.MapPost("/test-cron-job", () =>
 {
     RecurringJob.TriggerJob("accrue-interest-job");
     return Results.Ok("Cron job triggered");
 });
+
 
 RecurringJob.AddOrUpdate<InterestJobService>(
     "accrue-interest-job",
@@ -116,3 +127,7 @@ RecurringJob.AddOrUpdate<InterestJobService>(
 
 
 app.Run();
+
+public partial class Program
+{
+}

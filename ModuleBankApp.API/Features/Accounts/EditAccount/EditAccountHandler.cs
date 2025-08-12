@@ -9,14 +9,11 @@ public class EditAccountHandler(IAccountRepository repo, ILogger<EditAccountHand
     
     public async Task<MbResult<Account>> Handle(EditAccountRequest request, CancellationToken ct)
     {
-        var currentAccount = await repo.GetAccounById(request.AccountId);
-
-        currentAccount.Currency = request.EditAccountDto.Currency;
-        currentAccount.Balance = request.EditAccountDto.Balance;
-        currentAccount.InterestRate = request.EditAccountDto.InterestRate;
-        currentAccount.Type = request.EditAccountDto.Type;
+        var account = request.EditAccountDto.MapToAccount();
+        var currentAccount = await repo.UpdateAccount(account, request.AccountId);
         
         logger.LogInformation($"Update account {currentAccount.Id}");
+        
         return MbResult<Account>.Success(currentAccount);
     }
 }

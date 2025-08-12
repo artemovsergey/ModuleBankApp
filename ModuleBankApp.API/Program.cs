@@ -9,7 +9,13 @@ using ModuleBankApp.API.Data.Interfaces;
 using ModuleBankApp.API.Data.Repositories;
 using ModuleBankApp.API.Extensions;
 using ModuleBankApp.API.Features.Auth;
+using ModuleBankApp.API.Handlers;
+using ModuleBankApp.API.Metrics;
 using ModuleBankApp.API.Services;
+using Hangfire;
+using Hangfire.PostgreSql;
+using ModuleBankApp.API.Filters;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +28,9 @@ builder.Services.AddSerializeServices();
 builder.Services.AddAuthServices(config);
 
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
+        .AddOpenBehavior(typeof(HandlePerformancemetricBehavior<,>))
+);
 
 builder.Services.AddTransient(typeof(IRequestPreProcessor<>), typeof(LoggingBehavior<>));
 
@@ -30,16 +38,17 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddSingleton<ICurrencyService, CurrencyService>();
-builder.Services.AddSingleton<IAccountRepository, AccountMemoryRepository>();
-builder.Services.AddSingleton<ITransactionRepository, TransactionMemoryRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 
-builder.Services.AddDbContext<ModuleBankAppContext>();
+builder.Services.AddDbContext<ModuleBankAppContext>(o =>
+    o.UseNpgsql(config.GetConnectionString("PostgreSQL")));
 
+builder.Services.AddSingleton<HandlePerformancemetric>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
-
 
 builder.Services.AddAuthorization();
 
@@ -53,7 +62,19 @@ builder.Services.AddCors(options =>
     });
 });
 
+
+builder.Services.AddHangfire(x => x.UsePostgreSqlStorage(options =>
+{
+    options.UseNpgsqlConnection(config.GetConnectionString("HangfirePostgreSQL"));
+}));
+
+builder.Services.AddHangfireServer();
+
+
+builder.Services.AddTransient<InterestJobService>();
+
 var app = builder.Build();
+
 
 if (app.Environment.IsProduction())
 {
@@ -61,14 +82,52 @@ if (app.Environment.IsProduction())
     var dbContext = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
     dbContext.Database.EnsureDeleted();
     dbContext.Database.Migrate();
+    var sql = File.ReadAllText("Data/Procedures/accrue_interest.sql");
+    await dbContext.Database.ExecuteSqlRawAsync(sql);
 }
 
 app.UseCors("AllowAll");
-app.UseAuthentication();
-app.UseAuthorization();
+
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.UseLoginEndpoint(config);
 app.UseEndpointsRegister();
 
 app.UseSwaggerMiddleware();
+
+
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter() }
+});
+
+
+app.MapPost("/test-accrue-interest", async (Guid accountId, IMediator mediator) =>
+{
+    var result = await mediator.Send(new AccrueInterestRequest());
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+});
+
+
+app.MapPost("/test-cron-job", () =>
+{
+    RecurringJob.TriggerJob("accrue-interest-job");
+    return Results.Ok("Cron job triggered");
+});
+
+
+RecurringJob.AddOrUpdate<InterestJobService>(
+    "accrue-interest-job",
+    job => job.AccrueInterest(),
+    Cron.Daily);
+
+
 app.Run();
+
+public partial class Program
+{
+}

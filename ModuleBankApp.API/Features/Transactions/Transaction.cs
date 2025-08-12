@@ -1,3 +1,5 @@
+using ModuleBankApp.API.Features.Accounts;
+
 namespace ModuleBankApp.API.Features.Transactions;
 
 /// <summary>
@@ -9,12 +11,12 @@ public class Transaction
     /// Идентификатор транзакции
     /// </summary>
     public Guid Id { get; set; }
-
-
+    
     /// <summary>
     /// Идентификатор счета
     /// </summary>
     public Guid AccountId { get; set; }
+    public Account? Account { get; set; }
 
     /// <summary>
     /// Cчёт контрагента, которая заполняется только для внутренних переводов между счетами.
@@ -45,7 +47,7 @@ public class Transaction
     /// <summary>
     /// Время транзакции
     /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 }
 
 
@@ -54,6 +56,6 @@ public class Transaction
 /// </summary>
 public enum TransactionType
 {
-    Credit,
-    Debit
+    Credit = 0,
+    Debit = 1
 }

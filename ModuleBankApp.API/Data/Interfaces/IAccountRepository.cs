@@ -8,4 +8,6 @@ public interface IAccountRepository
     Task<Account> RemoveAccount(Guid id);
     Task<List<Account>> GetAllAccounts();
     Task<Account> GetAccounById(Guid? id);
+
+    Task<Account> UpdateAccount(Account acc, Guid accountId);
 }

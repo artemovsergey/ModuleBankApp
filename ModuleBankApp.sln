@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleBankApp.API", "ModuleBankApp.API\ModuleBankApp.API.csproj", "{45E73141-3D34-4F1A-A759-9E228637410E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModuleBankApp.Tests", "ModuleBankApp.Tests\ModuleBankApp.Tests.csproj", "{E2F60581-7898-49B7-B480-03AEE51FBD79}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{45E73141-3D34-4F1A-A759-9E228637410E}.Release|x64.Build.0 = Release|Any CPU
 		{45E73141-3D34-4F1A-A759-9E228637410E}.Release|x86.ActiveCfg = Release|Any CPU
 		{45E73141-3D34-4F1A-A759-9E228637410E}.Release|x86.Build.0 = Release|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Debug|x64.Build.0 = Debug|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Debug|x86.Build.0 = Debug|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Release|x64.ActiveCfg = Release|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Release|x64.Build.0 = Release|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Release|x86.ActiveCfg = Release|Any CPU
+		{E2F60581-7898-49B7-B480-03AEE51FBD79}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

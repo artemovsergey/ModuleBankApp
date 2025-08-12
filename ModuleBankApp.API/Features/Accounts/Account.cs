@@ -1,4 +1,5 @@
 using ModuleBankApp.API.Features.Transactions;
+using ModuleBankApp.API.Features.Transactions.RegisterTransaction;
 
 namespace ModuleBankApp.API.Features.Accounts;
 
@@ -51,12 +52,17 @@ public class Account
     /// Владелец счета
     /// </summary>
     public Guid OwnerId { get; set; }
+
+    /// <summary>
+    /// concurrency-token для оптимистичной блокировки (PostgreSQL xmin)
+    /// </summary>
+    public uint xmin { get; set; }
 }
 
 public enum AccountType
 {
-    Deposit,
-    Checking,
-    Credit,
-    None
+    Deposit = 0,
+    Checking = 1,
+    Credit = 2,
+    None = 3
 }

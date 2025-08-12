@@ -20,8 +20,9 @@ public static class GetAllAccountsEndpoint
                 if (string.IsNullOrEmpty(ownerIdClaim) || !Guid.TryParse(ownerIdClaim, out var ownerId))
                 {
                     return Results.Unauthorized();
+                    //ownerId = Guid.Parse("55555555-5555-5555-5555-555555555555");
                 }
-
+                
                 var request = new GetAllAccountsRequest(ownerId);
                 var response = await mediator.Send(request);
 

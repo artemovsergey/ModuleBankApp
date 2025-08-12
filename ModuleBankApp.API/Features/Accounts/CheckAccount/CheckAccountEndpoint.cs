@@ -14,14 +14,15 @@ public static class CheckAccountEndpoint
                 ClaimsPrincipal user
             ) =>
             {
+                
                 var ownerIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
-
+                
                 if (string.IsNullOrEmpty(ownerIdClaim) || !Guid.TryParse(ownerIdClaim, out var ownerId))
                 {
                     return Results.Unauthorized();
                 }
 
-                var request = new CheckAccountRequest(accountId, ownerId);
+                var request = new CheckAccountRequest(accountId);
                 var response = await mediator.Send(request);
 
                 return response.IsSuccess

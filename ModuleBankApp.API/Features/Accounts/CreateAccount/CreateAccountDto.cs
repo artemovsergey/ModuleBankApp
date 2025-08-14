@@ -1,25 +1,15 @@
-namespace ModuleBankApp.API.Features.Accounts.CreateAccount;
+using ModuleBankApp.API.Features.Transactions;
 
-public sealed class AccountDto
-{
-    /// <summary>
-    /// Тип счета (перечисление).
-    /// </summary>
-    public required AccountType Type { get; set; }
-    
-    /// <summary>
-    /// Валюта
-    /// </summary>
-    public required string Currency { get; set; }
-    
-    /// <summary>
-    /// Баланс
-    /// </summary>
-    public required decimal Balance { get; set; }
+namespace ModuleBankApp.API.Features.Accounts;
 
-    /// <summary>
-    /// Процентная ставка
-    /// </summary>
-    public decimal? InterestRate { get; set; }
-    
-}
+public record AccountDto(
+    Guid Id,
+    AccountType Type,
+    string Currency,
+    decimal Balance,
+    decimal? InterestRate,
+    DateTime CreatedAt,
+    DateTime? ClosedAt,
+    Guid OwnerId,
+    List<TransactionDto> Transactions
+);

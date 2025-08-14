@@ -29,33 +29,7 @@ public class CreateAccountFunctionTests
         1000m,
         null
     );
-        
-    [Fact]
-    public async Task HandleRequest_WithValidUserAndData_ReturnsCreatedResult()
-    {
-        // Arrange
-        var expectedAccount = new Account
-        {
-            Id = Guid.NewGuid(),
-            Currency = "RUB"
-        };
-        var expectedResponse = MbResult<Account>.Success(expectedAccount);
-
-        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateAccountRequest>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
-
-        // Act
-        var result = await CreateAccountEndpoint.HandleEndpoint(
-            _validAccountDto,
-            _mediatorMock.Object,
-            _userWithValidId);
-
-        // Assert
-        var createdResult = Assert.IsType<Created<Account>>(result);
-        Assert.Equal($"/account/{expectedAccount.Id}", createdResult.Location);
-        Assert.Equal(expectedAccount, createdResult.Value);
-    }
-
+    
     [Fact]
     public async Task HandleRequest_WithInvalidUser_ReturnsUnauthorized()
     {

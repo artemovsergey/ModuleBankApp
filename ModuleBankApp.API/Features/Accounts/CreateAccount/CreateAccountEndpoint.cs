@@ -35,7 +35,7 @@ public static class CreateAccountEndpoint
         var response = await mediator.Send(request);
 
         return response.IsSuccess
-            ? Results.CreatedAtRoute("GetAccount","/account/{response.Value.Id}", response.Value)
+            ? Results.CreatedAtRoute("GetAccount", new { id = response.Value.Id }, response.Value)
             // ? Results.Created($"/account/{response.Value.Id}", response.Value)
             : Results.BadRequest(response);
     }

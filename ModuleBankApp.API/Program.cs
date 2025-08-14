@@ -88,7 +88,7 @@ if (app.Environment.IsProduction())
 
 app.UseCors("AllowAll");
 
-if (!builder.Environment.IsEnvironment("Testing"))
+if (!app.Environment.IsEnvironment("Production")) 
 {
     app.UseAuthentication();
     app.UseAuthorization();

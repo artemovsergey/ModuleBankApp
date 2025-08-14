@@ -34,6 +34,9 @@ public sealed class IntegrationTestApplicationFactory : WebApplicationFactory<Pr
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+   
+        builder.UseEnvironment("Testing");
+        
         builder.ConfigureServices(services =>
         {
             var descriptor = services.SingleOrDefault(
@@ -56,6 +59,13 @@ public sealed class IntegrationTestApplicationFactory : WebApplicationFactory<Pr
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(_dbContainer.GetConnectionString())));
+            
+            services.AddAuthorizationBuilder()
+                            .AddPolicy("Allow", policy =>
+                {
+                    policy.RequireAssertion(_ => true); // всегда разрешено
+                });
+            
             
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();

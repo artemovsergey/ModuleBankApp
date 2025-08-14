@@ -10,39 +10,40 @@ public class TransferBetweenAccountHandler(
     ITransactionRepository repoTransaction,
     IAccountRepository repoAccount,
     ModuleBankAppContext dbContext,
-    ILogger<TransferBetweenAccountHandler> logger) : IRequestHandler<TransferBetweenAccountRequest, MbResult<TransactionDto>>
+    ILogger<TransferBetweenAccountHandler> logger)
+    : IRequestHandler<TransferBetweenAccountRequest, MbResult<TransactionDto>>
 {
     public async Task<MbResult<TransactionDto>> Handle(TransferBetweenAccountRequest request, CancellationToken ct)
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(
+            System.Data.IsolationLevel.Serializable, ct);
+
         try
         {
             var t = request.TransactionDto.ToEntity();
+
             var accountSender = await repoAccount.GetAccountById(t.AccountId);
-            accountSender.Balance -= t.Amount;
-            accountSender.Currency = t.Currency;
-            var accountReceiver = await repoAccount.GetAccountById((Guid)t.CounterPartyAccountId!);
+            var accountReceiver = await repoAccount.GetAccountById(t.CounterPartyAccountId!.Value);
+
             accountReceiver.Balance += t.Amount;
-            accountReceiver.Currency = t.Currency;
-            // Проверка итоговых балансов
-            if (accountSender.Balance < 0 || accountReceiver.Balance < 0)
-            {
-                await transaction.RollbackAsync(ct);
-                return MbResult<TransactionDto>.Failure("Некорректный итоговый баланс. Операция отменена.");
-            }
+            accountSender.Balance -= t.Amount;
+
             var result = await repoTransaction.RegisterTransaction(t);
-            try
-            {
-                await dbContext.SaveChangesAsync(ct);
-                await transaction.CommitAsync(ct);
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                await transaction.RollbackAsync(ct);
-                return MbResult<TransactionDto>.Failure("Conflict");
-            }
-            logger.LogWarning("Creating transfer between account {accountSender.Id} и {accountReceiver.Id}", accountSender.Id,accountReceiver.Id);
+
+            await dbContext.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+
+            logger.LogInformation(
+                "Transfer between accounts {SenderId} -> {ReceiverId}, Amount: {Amount} {Currency}",
+                accountSender.Id, accountReceiver.Id, t.Amount, t.Currency
+            );
+
             return MbResult<TransactionDto>.Success(result.ToDto());
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync(ct);
+            return MbResult<TransactionDto>.Failure("Conflict");
         }
         catch (Exception ex)
         {
@@ -52,5 +53,6 @@ public class TransferBetweenAccountHandler(
         }
     }
 }
+
 
 // +

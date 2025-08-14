@@ -1,25 +1,10 @@
 namespace ModuleBankApp.API.Features.Accounts.CreateAccount;
 
-public sealed class AccountDto
-{
-    /// <summary>
-    /// Тип счета (перечисление).
-    /// </summary>
-    public required AccountType Type { get; set; }
-    
-    /// <summary>
-    /// Валюта
-    /// </summary>
-    public required string Currency { get; set; }
-    
-    /// <summary>
-    /// Баланс
-    /// </summary>
-    public required decimal Balance { get; set; }
+public record CreateAccountDto(
+    AccountType Type,
+    string Currency,
+    decimal Balance,
+    decimal? InterestRate
+);
 
-    /// <summary>
-    /// Процентная ставка
-    /// </summary>
-    public decimal? InterestRate { get; set; }
-    
-}
+// +

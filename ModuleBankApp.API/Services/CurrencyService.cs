@@ -59,3 +59,5 @@ public class CurrencyService : ICurrencyService
         return _validCurrencyCodes.Value.ToList().AsReadOnly();
     }
 }
+
+// +

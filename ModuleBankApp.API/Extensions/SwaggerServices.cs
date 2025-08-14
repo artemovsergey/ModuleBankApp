@@ -6,6 +6,7 @@ namespace ModuleBankApp.API.Extensions;
 
 public static class SwaggerServices
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IServiceCollection AddSwaggerServices(this IServiceCollection services)
     {
         
@@ -30,7 +31,7 @@ public static class SwaggerServices
                     Contact = new OpenApiContact
                     {
                         Url = new Uri("https://github.com/artemovsergey/ModuleBankApp"),
-                        Email = "artik3314@gmail.com",
+                        Email = "artik3314@gmail.com"
                     }
                 }
             );
@@ -46,7 +47,7 @@ public static class SwaggerServices
                     Description = "Authorization using jwt token. Example: \"Bearer {token}\"",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
+                    Type = SecuritySchemeType.ApiKey
                 }
             );
 
@@ -59,11 +60,11 @@ public static class SwaggerServices
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
-                            },
+                                Id = "Bearer"
+                            }
                         },
                         []
-                    },
+                    }
                 }
             );
             
@@ -72,3 +73,5 @@ public static class SwaggerServices
         return services;
     }
 }
+
+// +

@@ -1,15 +1,16 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using ModuleBankApp.API.Services;
 
 namespace ModuleBankApp.API.Features.Accounts.GetAllAccounts;
 
+// ReSharper disable once UnusedType.Global
 public class GetAllAccountsValidator : AbstractValidator<GetAllAccountsRequest>
 {
-    public GetAllAccountsValidator(ICurrencyService currencyService)
+    public GetAllAccountsValidator()
     {
         RuleFor(request => request.ClaimsId)
             .NotNull()
             .WithMessage("ClaimsId cannot be null");
     }
 }
+
+// +

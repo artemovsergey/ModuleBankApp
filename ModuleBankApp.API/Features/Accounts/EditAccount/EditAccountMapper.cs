@@ -4,6 +4,7 @@ public static class EditAccountMapper
 {
     public static Account MapToAccount(this EditAccountDto editAccountDto)
     {
+        // ReSharper disable once RedundantEmptyObjectCreationArgumentList
         var account = new Account()
         {
             Balance = editAccountDto.Balance,
@@ -15,3 +16,5 @@ public static class EditAccountMapper
         return account;
     }
 }
+
+//+

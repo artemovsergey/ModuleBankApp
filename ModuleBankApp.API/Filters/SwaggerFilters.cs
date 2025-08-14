@@ -5,6 +5,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ModuleBankApp.API.Filters;
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class ErrorResponseSchemaFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
@@ -22,6 +23,7 @@ public class ErrorResponseSchemaFilter : ISchemaFilter
 }
 
 
+// ReSharper disable once ClassNeverInstantiated.Global
 public class ErrorResponseOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
@@ -50,3 +52,5 @@ public class ErrorResponseOperationFilter : IOperationFilter
         }
     }
 }
+
+// +

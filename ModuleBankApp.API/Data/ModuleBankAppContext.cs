@@ -16,15 +16,15 @@ public class ModuleBankAppContext : DbContext
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
+    // ReSharper disable once UnusedMember.Global
     public async Task AccrueInterestAsync(Guid accountId)
     {
-        var sql = "CALL public.accrue_interest({0})";
+        const string sql = "CALL public.accrue_interest({0})";
         await Database.ExecuteSqlRawAsync(sql, accountId);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Автоматическая установка расширения при первой миграции
         modelBuilder.HasPostgresExtension("btree_gist");
 
         modelBuilder.ApplyConfiguration(new AccountConfiguration());
@@ -33,3 +33,5 @@ public class ModuleBankAppContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 }
+
+// +

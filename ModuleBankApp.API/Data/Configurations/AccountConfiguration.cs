@@ -61,11 +61,12 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         //builder.HasData(GetSampleAccounts());
     }
 
-    private static IEnumerable<Account> GetSampleAccounts()
+    // ReSharper disable once UnusedMember.Local
+    private static List<Account> GetSampleAccounts()
     {
-        return new List<Account>
-        {
-            new()
+        return
+        [
+            new Account
             {
                 Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 Type = AccountType.Checking,
@@ -74,7 +75,8 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 InterestRate = null,
                 OwnerId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             },
-            new()
+
+            new Account
             {
                 Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 Type = AccountType.Deposit,
@@ -83,7 +85,8 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 InterestRate = 3.5m,
                 OwnerId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             },
-            new()
+
+            new Account
             {
                 Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
                 Type = AccountType.Credit,
@@ -92,7 +95,8 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 InterestRate = 15.0m,
                 OwnerId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
             },
-            new()
+
+            new Account
             {
                 Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
                 Type = AccountType.Checking,
@@ -101,7 +105,8 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 InterestRate = null,
                 OwnerId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
             },
-            new()
+
+            new Account
             {
                 Id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
                 Type = AccountType.Deposit,
@@ -110,6 +115,8 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 InterestRate = 4.2m,
                 OwnerId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc")
             }
-        };
+        ];
     }
+    
+    // +
 }

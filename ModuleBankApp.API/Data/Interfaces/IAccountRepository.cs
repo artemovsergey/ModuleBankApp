@@ -7,7 +7,8 @@ public interface IAccountRepository
     Task<Account> CreateAccount(Account acc);
     Task<Account> RemoveAccount(Guid id);
     Task<List<Account>> GetAllAccounts();
-    Task<Account> GetAccounById(Guid? id);
-
+    Task<Account> GetAccountById(Guid id);
     Task<Account> UpdateAccount(Account acc, Guid accountId);
 }
+
+// +

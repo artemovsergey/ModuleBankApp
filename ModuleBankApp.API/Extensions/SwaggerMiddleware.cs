@@ -2,6 +2,7 @@ namespace ModuleBankApp.API.Extensions;
 
 public static class SwaggerMiddleware
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static WebApplication UseSwaggerMiddleware(this WebApplication app)
     {
         app.MapOpenApi();
@@ -14,3 +15,5 @@ public static class SwaggerMiddleware
         return app;
     }
 }
+
+// +

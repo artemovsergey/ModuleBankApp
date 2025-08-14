@@ -14,15 +14,15 @@ public class RegisterTransactionHandler(
     {
         var transactionEntity = request.TransactionDto.ToEntity();
         
-        var account = await repoAccount.GetAccounById(transactionEntity.AccountId);
+        var account = await repoAccount.GetAccountById(transactionEntity.AccountId);
         account.Balance += transactionEntity.Amount;
         account.Currency = transactionEntity.Currency;
         
         var savedTransaction = await repoTransaction.RegisterTransaction(transactionEntity);
-        logger.LogWarning($"Creating transaction for account {savedTransaction.AccountId}", request.ClaimsId);
+        logger.LogWarning("Creating transaction for account {savedTransaction.AccountId}", savedTransaction.AccountId);
         
         await repoAccount.UpdateAccount(account, account.Id);
-        logger.LogWarning($"Update state account {account.Id}", request.ClaimsId);
+        logger.LogWarning("Update state account {account.Id}", account.Id);
 
         return MbResult<TransactionDto>.Success(savedTransaction.ToDto());
     }

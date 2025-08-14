@@ -10,9 +10,10 @@ using Hangfire.PostgreSql;
 using Testcontainers.PostgreSql;
 using Xunit;
 
-namespace ModuleBankApp.Tests;
+namespace ModuleBankApp.Tests.Integration;
 
-public class IntegrationTestApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class IntegrationTestApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres:latest")
@@ -20,46 +21,7 @@ public class IntegrationTestApplicationFactory : WebApplicationFactory<Program>,
         .WithUsername("postgres")
         .WithPassword("root")
         .Build();
-
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.ConfigureServices(services =>
-        {
-            var descriptor = services.SingleOrDefault(
-                s => s.ServiceType == typeof(DbContextOptions<ModuleBankAppContext>));
-
-            if (descriptor != null)
-                services.Remove(descriptor);
-
-            services.AddDbContext<ModuleBankAppContext>(options =>
-                options.UseNpgsql(_dbContainer.GetConnectionString()));
-
-            
-            // Удаляем Hangfire, если он зарегистрирован
-            var hangfireDescriptor = services.FirstOrDefault(d => 
-                d.ServiceType == typeof(JobStorage));
-            if (hangfireDescriptor != null)
-            {
-                services.Remove(hangfireDescriptor);
-            }
-
-            // Добавляем Hangfire с тестовым подключением
-            services.AddHangfire(configuration => configuration
-                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UsePostgreSqlStorage(_dbContainer.GetConnectionString()));
-            
-            
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
-            db.Database.EnsureDeleted();
-            db.Database.EnsureCreated();
-        });
-    }
-
+    
     public Task InitializeAsync()
     {
         return _dbContainer.StartAsync();
@@ -69,4 +31,39 @@ public class IntegrationTestApplicationFactory : WebApplicationFactory<Program>,
     {
         return _dbContainer.StopAsync();
     }
+    
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureServices(services =>
+        {
+            var descriptor = services.SingleOrDefault(
+                s => s.ServiceType == typeof(DbContextOptions<ModuleBankAppContext>));
+
+            if (descriptor != null) services.Remove(descriptor);
+
+            services.AddDbContext<ModuleBankAppContext>(options =>
+                options.UseNpgsql(_dbContainer.GetConnectionString()));
+
+            var hangfireDescriptor = services.FirstOrDefault(d => 
+                d.ServiceType == typeof(JobStorage));
+            if (hangfireDescriptor != null)
+            {
+                services.Remove(hangfireDescriptor);
+            }
+
+            services.AddHangfire(configuration => configuration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(_dbContainer.GetConnectionString())));
+            
+            var sp = services.BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
+            db.Database.EnsureDeleted();
+            db.Database.EnsureCreated();
+        });
+    }
 }
+
+// +

@@ -62,11 +62,12 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
         //builder.HasData(GetSampleTransactions());
     }
 
-    private static IEnumerable<Transaction> GetSampleTransactions()
+    // ReSharper disable once UnusedMember.Local
+    private static List<Transaction> GetSampleTransactions()
     {
-        return new List<Transaction>
-        {
-            new()
+        return
+        [
+            new Transaction
             {
                 Id = Guid.Parse("01010101-0101-0101-0101-010101010101"),
                 AccountId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
@@ -76,7 +77,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 Type = TransactionType.Debit,
                 Description = "Перевод на депозитный счет"
             },
-            new()
+
+            new Transaction
             {
                 Id = Guid.Parse("02020202-0202-0202-0202-020202020202"),
                 AccountId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
@@ -86,7 +88,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 Type = TransactionType.Credit,
                 Description = "Пополнение через терминал"
             },
-            new()
+
+            new Transaction
             {
                 Id = Guid.Parse("03030303-0303-0303-0303-030303030303"),
                 AccountId = Guid.Parse("33333333-3333-3333-3333-333333333333"),
@@ -96,7 +99,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 Type = TransactionType.Credit,
                 Description = "Погашение кредита"
             },
-            new()
+
+            new Transaction
             {
                 Id = Guid.Parse("04040404-0404-0404-0404-040404040404"),
                 AccountId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
@@ -106,7 +110,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 Type = TransactionType.Debit,
                 Description = "Оплата услуг"
             },
-            new()
+
+            new Transaction
             {
                 Id = Guid.Parse("05050505-0505-0505-0505-050505050505"),
                 AccountId = Guid.Parse("55555555-5555-5555-5555-555555555555"),
@@ -116,6 +121,8 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
                 Type = TransactionType.Credit,
                 Description = "Начисление процентов"
             }
-        };
+        ];
     }
 }
+
+// +

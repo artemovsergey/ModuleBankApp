@@ -15,3 +15,5 @@ public class HandlePerformancemetric
     public void MilliSecondElapsed(long millisecond) =>
         _millisecondElapced.Add(millisecond);
 }
+
+// +

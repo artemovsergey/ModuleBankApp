@@ -12,8 +12,9 @@ public class EditAccountHandler(IAccountRepository repo, ILogger<EditAccountHand
         var account = request.EditAccountDto.MapToAccount();
         var currentAccount = await repo.UpdateAccount(account, request.AccountId);
         
-        logger.LogInformation($"Update account {currentAccount.Id}");
-        
+        logger.LogInformation("Update account {currentAccountId}", currentAccount.Id);
         return MbResult<Account>.Success(currentAccount);
     }
 }
+
+//+

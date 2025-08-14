@@ -30,17 +30,15 @@ public class AccountRepository(ModuleBankAppContext db) : IAccountRepository
         return acc;
     }
 
-
-
     public async Task<List<Account>> GetAllAccounts()
     {
         return await db.Accounts.ToListAsync();
     }
 
-    public async Task<Account> GetAccounById(Guid? id)
+    public async Task<Account> GetAccountById(Guid id)
     {
-        var account = await db.Accounts.FirstOrDefaultAsync(a => a.Id == id);
-        return account ?? throw new KeyNotFoundException("Account not found");
+        var result = await db.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+        return result!;
     }
 
     public async Task<Account> RemoveAccount(Guid id)
@@ -52,3 +50,5 @@ public class AccountRepository(ModuleBankAppContext db) : IAccountRepository
         return acc;
     }
 }
+
+// +

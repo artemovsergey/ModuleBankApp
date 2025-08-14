@@ -5,31 +5,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ModuleBankApp.API.Middlewares;
 
-public class ExceptionHandlerMiddleware
+// ReSharper disable once UnusedType.Global
+public class ExceptionHandlerMiddleware(
+    RequestDelegate next,
+    ILogger<ExceptionHandlerMiddleware> logger,
+    IHostEnvironment env)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionHandlerMiddleware> _logger;
-    private readonly IHostEnvironment _env;
-
-    public ExceptionHandlerMiddleware(
-        RequestDelegate next,
-        ILogger<ExceptionHandlerMiddleware> logger,
-        IHostEnvironment env)
-    {
-        _next = next;
-        _logger = logger;
-        _env = env;
-    }
-
+    // ReSharper disable once UnusedMember.Global
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception has occurred");
+            logger.LogError(ex, "An unhandled exception has occurred");
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -41,7 +32,7 @@ public class ExceptionHandlerMiddleware
         var problemDetails = new ProblemDetails
         {
             Instance = context.Request.Path,
-            Detail = _env.IsDevelopment() ? exception.StackTrace : null,
+            Detail = env.IsDevelopment() ? exception.StackTrace : null,
             Extensions = { ["traceId"] = context.TraceIdentifier }
         };
 
@@ -84,12 +75,8 @@ public class ExceptionHandlerMiddleware
 
         context.Response.StatusCode = problemDetails.Status.Value;
         
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = _env.IsDevelopment()
-        };
-        
-        return context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails, options));
+        return context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
     }
 }
+
+// +

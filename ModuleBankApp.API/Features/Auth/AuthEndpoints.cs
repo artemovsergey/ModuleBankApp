@@ -4,6 +4,7 @@ namespace ModuleBankApp.API.Features.Auth;
 
 public static class AuthEndpoints
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static WebApplication UseLoginEndpoint(this WebApplication app, IConfiguration config)
     {
         app.MapPost("/auth/login", async (LoginRequest request, IHttpClientFactory httpClientFactory) =>
@@ -38,9 +39,11 @@ public static class AuthEndpoints
             }).WithName("Login")
             .WithSummary("Аутентификация")
             .WithDescription("Возвращает jwt токен с Guid пользователя")
-            .Produces<string>(StatusCodes.Status200OK)
+            .Produces<string>()
             .Produces(StatusCodes.Status401Unauthorized);
         
         return app;
     }
 }
+
+// +

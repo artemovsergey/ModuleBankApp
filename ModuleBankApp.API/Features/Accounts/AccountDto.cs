@@ -1,4 +1,5 @@
 using ModuleBankApp.API.Features.Transactions;
+// ReSharper disable NotAccessedPositionalProperty.Global
 
 namespace ModuleBankApp.API.Features.Accounts;
 
@@ -13,3 +14,5 @@ public record AccountDto(
     Guid OwnerId,
     List<TransactionDto> Transactions
 );
+
+// +

@@ -1,4 +1,5 @@
 using ModuleBankApp.API.Features.Accounts;
+// ReSharper disable PropertyCanBeMadeInitOnly.Global
 
 namespace ModuleBankApp.API.Features.Transactions;
 
@@ -59,3 +60,5 @@ public enum TransactionType
     Credit = 0,
     Debit = 1
 }
+
+// +

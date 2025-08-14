@@ -4,6 +4,7 @@ public static class TransactionMapper
 {
     public static TransactionDto ToDto(this Transaction entity)
     {
+        // ReSharper disable once RedundantEmptyObjectCreationArgumentList
         return new TransactionDto()
         {
             AccountId = entity.AccountId,
@@ -24,7 +25,9 @@ public static class TransactionMapper
             Currency = dto.Currency,
             Amount = dto.Amount,
             Type = dto.Type,
-            Description = dto.Description,
+            Description = dto.Description
         };
     }
 }
+
+// +

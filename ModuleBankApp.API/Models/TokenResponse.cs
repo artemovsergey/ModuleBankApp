@@ -1,3 +1,6 @@
+// ReSharper disable InconsistentNaming
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable NotAccessedPositionalProperty.Global
 namespace ModuleBankApp.API.Models;
 
 public record TokenResponse(
@@ -9,3 +12,5 @@ public record TokenResponse(
     string id_token,
     string scope
 );
+
+// +

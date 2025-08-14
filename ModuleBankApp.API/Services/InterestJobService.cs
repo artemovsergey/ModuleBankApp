@@ -3,17 +3,12 @@ using ModuleBankApp.API.Handlers;
 
 namespace ModuleBankApp.API.Services;
 
-public class InterestJobService
+public class InterestJobService(IMediator mediator)
 {
-    private readonly IMediator _mediator;
-
-    public InterestJobService(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     public async Task AccrueInterest()
     {
-        await _mediator.Send(new AccrueInterestRequest());
+        await mediator.Send(new AccrueInterestRequest());
     }
 }
+
+// +

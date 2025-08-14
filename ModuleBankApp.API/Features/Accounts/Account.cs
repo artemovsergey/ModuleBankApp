@@ -1,12 +1,11 @@
 using ModuleBankApp.API.Features.Transactions;
-using ModuleBankApp.API.Features.Transactions.RegisterTransaction;
 
 namespace ModuleBankApp.API.Features.Accounts;
 
 /// <summary>
 /// Модель банковского счёта.
 /// </summary>
-public class Account
+public sealed class Account
 {
     /// <summary>
     /// Идентификатор (обязательное поле).
@@ -16,6 +15,7 @@ public class Account
     /// <summary>
     /// Тип счета (перечисление).
     /// </summary>
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public AccountType Type { get; set; }
     
     /// <summary>
@@ -31,32 +31,47 @@ public class Account
     /// <summary>
     /// Процентная ставка
     /// </summary>
+    /// 
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public decimal? InterestRate { get; set; }
 
     /// <summary>
     /// Дата открытия счета
     /// </summary>
+    ///
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// Дата закрытия счета
     /// </summary>
-    public DateTime? ClosedAt { get; set; } = null;
+    ///
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
+    // ReSharper disable once RedundantDefaultMemberInitializer
+    public DateTime? ClosedAt { get; set; } = null!;
 
     /// <summary>
     /// Список транзакций по счету
     /// </summary>
+    ///
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
+    // ReSharper disable once CollectionNeverUpdated.Global
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     
     /// <summary>
     /// Владелец счета
     /// </summary>
+    ///
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public Guid OwnerId { get; set; }
 
     /// <summary>
     /// concurrency-token для оптимистичной блокировки (PostgreSQL xmin)
     /// </summary>
-    public uint xmin { get; set; }
+    ///
+    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
+    // ReSharper disable once UnusedMember.Global
+    public uint Xmin { get; set; }
 }
 
 public enum AccountType
@@ -66,3 +81,5 @@ public enum AccountType
     Credit = 2,
     None = 3
 }
+
+// +

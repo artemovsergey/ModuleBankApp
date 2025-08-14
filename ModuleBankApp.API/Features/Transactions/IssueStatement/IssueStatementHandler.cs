@@ -10,8 +10,10 @@ public class IssueStatementHandler(
 {
     public async Task<MbResult<List<Transaction>>> Handle(IssueStatementRequest request, CancellationToken ct)
     {
-        var result = await repoTransaction.GetTransactionsByAccount(request.accountId);
-        logger.LogWarning($"Transactions count by accountId {result.Count()}", request.ClaimsId);
+        var result = await repoTransaction.GetTransactionsByAccount(request.AccountId);
+        logger.LogWarning("Transactions count by accountId {count}", result.Count);
         return MbResult<List<Transaction>>.Success(result);
     }
 }
+
+// +

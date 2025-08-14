@@ -3,5 +3,7 @@ using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Features.Transactions.IssueStatement;
 
-public record IssueStatementRequest(Guid accountId, Guid ClaimsId)
+// ReSharper disable once NotAccessedPositionalProperty.Global
+public record IssueStatementRequest(Guid AccountId, Guid ClaimsId)
     : IRequest<MbResult<List<Transaction>>>;
+    // +

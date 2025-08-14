@@ -37,7 +37,7 @@ public class AccountRepository(ModuleBankAppContext db) : IAccountRepository
 
     public async Task<Account> GetAccountById(Guid id)
     {
-        var result = await db.Accounts.FirstOrDefaultAsync(a => a.Id == id);
+        var result = await db.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
         return result!;
     }
 

@@ -8,11 +8,9 @@ namespace ModuleBankApp.API.Features.Transactions.TransferBetweenAccount;
 // ReSharper disable once UnusedType.Global
 public static class TransferBetweenAccountEndpoint
 {
-    
     // ReSharper disable once UnusedMember.Global
     public static WebApplication MapEndpoint(this WebApplication app)
     {
-        var policyName = app.Environment.IsEnvironment("Testing") ? "Allow" : "";
         app.MapPost("/transaction/transfer", HandleTransferBetweenAccounts)
             .WithTags("Транзакции по счетам")
             .WithName("CreateTransactionBetweenAccounts")
@@ -21,7 +19,7 @@ public static class TransferBetweenAccountEndpoint
             .Produces<Transaction>(StatusCodes.Status201Created)
             .Produces<MbResult<Transaction>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization(policyName);
+            .RequireAuthorization();
 
         return app;
     }
@@ -29,21 +27,11 @@ public static class TransferBetweenAccountEndpoint
     private static async Task<IResult> HandleTransferBetweenAccounts(
         TransactionDto transactionDto,
         IMediator mediator,
-        ClaimsPrincipal user,
-        IHostEnvironment env)
+        ClaimsPrincipal user)
     {
-        
-        Guid ownerId;
-        if (!env.IsEnvironment("Testing"))
-        {
-             ownerId = user.GetOwnerIdFromClaims();
-             if (ownerId == Guid.Empty) return Results.Unauthorized();
-        }
-        else
-        {
-             ownerId = Guid.Parse("11111111-1111-1111-1111-111111111111"); 
-        }
-        
+        var ownerId = user.GetOwnerIdFromClaims();
+        if (ownerId == Guid.Empty) return Results.Unauthorized();
+
         var request = new TransferBetweenAccountRequest(transactionDto, ownerId);
         var response = await mediator.Send(request);
 

@@ -1,40 +1,17 @@
 using System.Security.Claims;
 using MediatR;
+using ModuleBankApp.API.Extensions;
 using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Features.Transactions.TransferBetweenAccount;
 
+// ReSharper disable once UnusedType.Global
 public static class TransferBetweenAccountEndpoint
 {
+    // ReSharper disable once UnusedMember.Global
     public static WebApplication MapEndpoint(this WebApplication app)
     {
-        app.MapPost("/transaction/transfer", async (
-                TransactionDto transactionDto,
-                IMediator mediator,
-                ClaimsPrincipal user
-            ) =>
-            {
-
-                var ownerIdClaim = user.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                if (string.IsNullOrEmpty(ownerIdClaim) || !Guid.TryParse(ownerIdClaim, out var ownerId))
-                {
-                    return Results.Unauthorized();
-                }
-
-               
-
-                var request = new TransferBetweenAccountRequest(transactionDto, ownerId);
-                var response = await mediator.Send(request);
-
-                if (response.Error == "Conflict")
-                    return Results.Conflict(
-                        "Операция не может быть выполнена из-за конфликта данных. Пожалуйста, повторите попытку позже.");
-
-                return response.IsSuccess
-                    ? Results.Created("", response.Value)
-                    : Results.BadRequest(response.Error);
-            })
+        app.MapPost("/transaction/transfer", HandleTransferBetweenAccounts)
             .WithTags("Транзакции по счетам")
             .WithName("CreateTransactionBetweenAccounts")
             .WithSummary("Создание трансфера между счетами")
@@ -43,7 +20,29 @@ public static class TransferBetweenAccountEndpoint
             .Produces<MbResult<Transaction>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
             .RequireAuthorization();
-        
+
         return app;
     }
+
+    private static async Task<IResult> HandleTransferBetweenAccounts(
+        TransactionDto transactionDto,
+        IMediator mediator,
+        ClaimsPrincipal user)
+    {
+        var ownerId = user.GetOwnerIdFromClaims();
+        if (ownerId == Guid.Empty) return Results.Unauthorized();
+
+        var request = new TransferBetweenAccountRequest(transactionDto, ownerId);
+        var response = await mediator.Send(request);
+
+        if (response.Error == "Conflict")
+            return Results.Conflict(
+                "Операция не может быть выполнена из-за конфликта данных. Пожалуйста, повторите попытку позже.");
+
+        return response.IsSuccess
+            ? Results.Created("", response.Value)
+            : Results.BadRequest(response.Error);
+    }
 }
+
+// +

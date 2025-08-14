@@ -23,26 +23,28 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
             .Where(e => e != null)
             .ToList();
 
-        if (failures.Any())
+        // ReSharper disable once InvertIf
+        if (failures.Count > 0)
         {
             var errorMessage = string.Join("; ", failures.Select(e => e.ErrorMessage));
 
             // Пытаемся достать тип T из MbResult<T>
             var responseType = typeof(TResponse);
-            if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(MbResult<>))
-            {
-                var innerType = responseType.GetGenericArguments()[0];
-                var failureMethod = typeof(MbResult<>)
-                    .MakeGenericType(innerType)
-                    .GetMethod(nameof(MbResult<object>.Failure))!;
+            if (!responseType.IsGenericType || responseType.GetGenericTypeDefinition() != typeof(MbResult<>))
+                throw new InvalidOperationException("TResponse must be of type MbResult<T>");
+            
+            var innerType = responseType.GetGenericArguments()[0];
+            var failureMethod = typeof(MbResult<>)
+                .MakeGenericType(innerType)
+                .GetMethod(nameof(MbResult<object>.Failure))!;
 
-                var failureResult = failureMethod.Invoke(null, new object[] { errorMessage });
-                return (TResponse)failureResult!;
-            }
+            var failureResult = failureMethod.Invoke(null, [errorMessage]);
+            return (TResponse)failureResult!;
 
-            throw new InvalidOperationException("TResponse must be of type MbResult<T>");
         }
 
         return await next();
     }
 }
+
+// +

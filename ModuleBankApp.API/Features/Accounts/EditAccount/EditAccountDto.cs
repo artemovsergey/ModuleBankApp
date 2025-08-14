@@ -1,8 +1,10 @@
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace ModuleBankApp.API.Features.Accounts.EditAccount;
 
 /// <summary>
 /// Модель передачи данных при редактировании счета.
 /// </summary>
+// ReSharper disable once ClassNeverInstantiated.Global
 public sealed class EditAccountDto
 {
     /// <summary>
@@ -30,4 +32,12 @@ public sealed class EditAccountDto
     /// </summary>
     public decimal? InterestRate { get; set; }
     
+    /// <summary>
+    /// Xmin в PostgreSQL
+    /// </summary>
+    // ReSharper disable once UnusedMember.Global
+    public required uint Xmin { get; set; }
+    
 }
+
+// +

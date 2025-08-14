@@ -14,3 +14,5 @@ public class GetAllAccountsHandler(IAccountRepository repo, ILogger<GetAllAccoun
         return MbResult<List<Account>>.Success(result);
     }
 }
+
+// +

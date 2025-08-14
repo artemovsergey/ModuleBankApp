@@ -1,15 +1,16 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-using ModuleBankApp.API.Services;
 
 namespace ModuleBankApp.API.Features.Accounts.RemoveAccount;
 
+// ReSharper disable once UnusedType.Global
 public class RemoveAccountValidator : AbstractValidator<RemoveAccountRequest>
 {
-    public RemoveAccountValidator(ICurrencyService currencyService)
+    public RemoveAccountValidator()
     {
         RuleFor(request => request.AccountId)
             .NotNull()
             .WithMessage("AccountId must be not null");
     }
 }
+
+// +

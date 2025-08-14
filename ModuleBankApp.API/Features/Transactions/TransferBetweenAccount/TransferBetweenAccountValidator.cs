@@ -3,6 +3,7 @@ using ModuleBankApp.API.Services;
 
 namespace ModuleBankApp.API.Features.Transactions.TransferBetweenAccount;
 
+// ReSharper disable once UnusedType.Global
 public class TransferBetweenAccountValidator : AbstractValidator<TransferBetweenAccountRequest>
 {
     public TransferBetweenAccountValidator(ICurrencyService currencyService)
@@ -24,7 +25,6 @@ public class TransferBetweenAccountValidator : AbstractValidator<TransferBetween
             .WithMessage("Currency code must be 3 characters long.")
             .Must(currencyService.IsValidCurrencyCode)
             .WithMessage("Invalid currency code. Please provide a valid ISO 4217 currency code.");
-
-  
     }
 }
+// +

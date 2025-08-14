@@ -5,6 +5,7 @@ namespace ModuleBankApp.API.Extensions;
 
 public static class AuthServices
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration config)
     {
         services.AddAuthentication(options =>
@@ -38,3 +39,5 @@ public static class AuthServices
         return services;
     }
 }
+
+// +

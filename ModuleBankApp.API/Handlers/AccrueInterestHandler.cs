@@ -6,7 +6,7 @@ using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Handlers;
 
-public record AccrueInterestRequest() : IRequest<MbResult<bool>>;
+public record AccrueInterestRequest : IRequest<MbResult<bool>>;
 
 public class AccrueInterestForAllHandler(
     ModuleBankAppContext db,
@@ -15,7 +15,7 @@ public class AccrueInterestForAllHandler(
 {
     public async Task<MbResult<bool>> Handle(AccrueInterestRequest request, CancellationToken ct)
     {
-        using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
         try
         {
@@ -45,3 +45,5 @@ public class AccrueInterestForAllHandler(
         }
     }
 }
+
+// +

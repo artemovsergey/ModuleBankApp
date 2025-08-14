@@ -8,7 +8,6 @@ public sealed class HandlePerformancemetricBehavior<TRequest, TResponse>(HandleP
     IPipelineBehavior<TRequest, TResponse> where TRequest :
     IRequest<TResponse>
 {
-    private readonly HandlePerformancemetric _metric = metric;
     private readonly Stopwatch _timer = new();
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
@@ -17,8 +16,10 @@ public sealed class HandlePerformancemetricBehavior<TRequest, TResponse>(HandleP
         var response =  await next();
         _timer.Stop();
 
-        _metric.MilliSecondElapsed(_timer.ElapsedMilliseconds);
+        metric.MilliSecondElapsed(_timer.ElapsedMilliseconds);
         
         return response;
     }
 }
+
+// +

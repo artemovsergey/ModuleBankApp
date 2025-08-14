@@ -6,6 +6,7 @@ namespace ModuleBankApp.API.Extensions;
 
 public static class SerializeServices
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IServiceCollection AddSerializeServices(this IServiceCollection services)
     {
         services.ConfigureHttpJsonOptions(options =>
@@ -22,3 +23,5 @@ public static class SerializeServices
         return services;
     }    
 }
+
+// +

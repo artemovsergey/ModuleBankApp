@@ -1,15 +1,15 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 using ModuleBankApp.API.Services;
 
 namespace ModuleBankApp.API.Features.Accounts.EditAccount;
 
+// ReSharper disable once UnusedType.Global
 public class EditAccountValidator : AbstractValidator<EditAccountRequest>
 {
     public EditAccountValidator(ICurrencyService currencyService)
     {
-        ClassLevelCascadeMode = CascadeMode.Continue; // Проверять все поля, даже если есть ошибки
-        RuleLevelCascadeMode = CascadeMode.Stop; // По каждому полю — первая ошибка
+        ClassLevelCascadeMode = CascadeMode.Continue;
+        RuleLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(request => request.EditAccountDto.Balance)
             .NotNull()
@@ -44,3 +44,5 @@ public class EditAccountValidator : AbstractValidator<EditAccountRequest>
         });
     }
 }
+
+// +

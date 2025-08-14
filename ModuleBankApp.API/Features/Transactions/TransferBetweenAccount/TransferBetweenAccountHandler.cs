@@ -18,10 +18,10 @@ public class TransferBetweenAccountHandler(
         try
         {
             var t = request.TransactionDto.ToEntity();
-            var accountSender = await repoAccount.GetAccounById(t.AccountId);
+            var accountSender = await repoAccount.GetAccountById(t.AccountId);
             accountSender.Balance -= t.Amount;
             accountSender.Currency = t.Currency;
-            var accountReceiver = await repoAccount.GetAccounById(t.CounterPartyAccountId);
+            var accountReceiver = await repoAccount.GetAccountById((Guid)t.CounterPartyAccountId!);
             accountReceiver.Balance += t.Amount;
             accountReceiver.Currency = t.Currency;
             // Проверка итоговых балансов
@@ -41,7 +41,7 @@ public class TransferBetweenAccountHandler(
                 await transaction.RollbackAsync(ct);
                 return MbResult<TransactionDto>.Failure("Conflict");
             }
-            logger.LogWarning($"Creating transfer between account {accountSender.Id} и {accountReceiver.Id}", request.ClaimsId);
+            logger.LogWarning("Creating transfer between account {accountSender.Id} и {accountReceiver.Id}", accountSender.Id,accountReceiver.Id);
             return MbResult<TransactionDto>.Success(result.ToDto());
         }
         catch (Exception ex)
@@ -52,3 +52,5 @@ public class TransferBetweenAccountHandler(
         }
     }
 }
+
+// +

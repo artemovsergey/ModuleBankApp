@@ -4,6 +4,7 @@ namespace ModuleBankApp.API.Extensions;
 
 public static class EndpointsRegister
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static WebApplication UseEndpointsRegister(this WebApplication app)
     {
         var endpointTypes = Assembly.GetExecutingAssembly().GetTypes()
@@ -18,3 +19,5 @@ public static class EndpointsRegister
         return app;
     }
 }
+
+// +

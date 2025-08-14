@@ -45,7 +45,7 @@ builder.Services.AddDbContext<ModuleBankAppContext>(o =>
     o.UseNpgsql(config.GetConnectionString("PostgreSQL")));
 
 builder.Services.AddSingleton<HandlePerformancemetric>();
-builder.Services.AddSingleton<IAuthService, AuthService>();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
@@ -102,11 +102,11 @@ app.UseSwaggerMiddleware();
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
-    Authorization = new[] { new HangfireAuthorizationFilter() }
+    Authorization = [new HangfireAuthorizationFilter()]
 });
 
 
-app.MapPost("/test-accrue-interest", async (Guid accountId, IMediator mediator) =>
+app.MapPost("/test-accrue-interest", async (IMediator mediator) =>
 {
     var result = await mediator.Send(new AccrueInterestRequest());
     return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
@@ -128,6 +128,8 @@ RecurringJob.AddOrUpdate<InterestJobService>(
 
 app.Run();
 
-public partial class Program
-{
-}
+// ReSharper disable once ClassNeverInstantiated.Global
+// ReSharper disable once RedundantTypeDeclarationBody
+public partial class Program {  }
+
+// +

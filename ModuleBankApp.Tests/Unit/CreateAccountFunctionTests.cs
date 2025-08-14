@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,18 +9,17 @@ using ModuleBankApp.API.Data.Interfaces;
 using ModuleBankApp.API.Features.Accounts;
 using Moq;
 using ModuleBankApp.API.Features.Accounts.CreateAccount;
-using ModuleBankApp.API.Features.Transactions;
 using ModuleBankApp.API.Generic;
 using Xunit;
 
-namespace ModuleBankApp.Tests;
+namespace ModuleBankApp.Tests.Unit;
 
 public class CreateAccountFunctionTests
 {
     private readonly Mock<IMediator> _mediatorMock = new();
 
     private readonly ClaimsPrincipal _userWithValidId = new(new ClaimsIdentity(
-        new[] { new Claim(ClaimTypes.NameIdentifier, "a191ee39-08a7-4ffa-8f53-3c5f0f5f9b1c") }));
+        [new Claim(ClaimTypes.NameIdentifier, "a191ee39-08a7-4ffa-8f53-3c5f0f5f9b1c")]));
 
     private readonly ClaimsPrincipal _userWithoutId = new(new ClaimsIdentity());
 
@@ -47,7 +45,7 @@ public class CreateAccountFunctionTests
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await CreateAccountFunction.HandleEndpoint(
+        var result = await CreateAccountEndpoint.HandleEndpoint(
             _validAccountDto,
             _mediatorMock.Object,
             _userWithValidId);
@@ -62,7 +60,7 @@ public class CreateAccountFunctionTests
     public async Task HandleRequest_WithInvalidUser_ReturnsUnauthorized()
     {
         // Act
-        var result = await CreateAccountFunction.HandleEndpoint(
+        var result = await CreateAccountEndpoint.HandleEndpoint(
             _validAccountDto,
             _mediatorMock.Object,
             _userWithoutId);
@@ -80,7 +78,7 @@ public class CreateAccountFunctionTests
             .ReturnsAsync(errorResponse);
 
         // Act
-        var result = await CreateAccountFunction.HandleEndpoint(
+        var result = await CreateAccountEndpoint.HandleEndpoint(
             _validAccountDto,
             _mediatorMock.Object,
             _userWithValidId);
@@ -132,3 +130,5 @@ public class CreateAccountFunctionTests
     }
 
 }
+
+// +

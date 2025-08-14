@@ -5,12 +5,27 @@ using ModuleBankApp.API.Generic;
 namespace ModuleBankApp.API.Features.Accounts.CheckAccount;
 
 public class CheckAccountHandler(IAccountRepository repo, ILogger<CheckAccountHandler> logger)
-    : IRequestHandler<CheckAccountRequest, MbResult<Account>>
+    : IRequestHandler<CheckAccountRequest, MbResult<AccountDto>>
 {
-    public async Task<MbResult<Account>> Handle(CheckAccountRequest request, CancellationToken ct)
+    public async Task<MbResult<AccountDto>> Handle(CheckAccountRequest request, CancellationToken ct)
     {
-        var result = await repo.GetAccounById(request.AccountId);
-        logger.LogInformation($"Get account by Id:  {request.AccountId}");
-        return MbResult<Account>.Success(result);
+        var account = await repo.GetAccountById(request.AccountId);
+
+        if (account == null!)
+        {
+            logger.LogInformation("Account with Id: {accountId} not found.", request.AccountId);
+            return MbResult<AccountDto>.Failure("Account not found.");
+        }
+
+        if (account.OwnerId != request.OwnerId)
+        {
+            logger.LogWarning("Forbidden access to account with Id: {AccountId} for OwnerId: {OwnerId}.", request.AccountId, request.OwnerId);
+            return MbResult<AccountDto>.Failure("Forbidden");
+        }
+        
+        logger.LogInformation("Account with Id: {AccountId} found for OwnerId: {OwnerId}.",request.AccountId,request.OwnerId);
+        return MbResult<AccountDto>.Success(account.ToDto());
     }
 }
+
+// +

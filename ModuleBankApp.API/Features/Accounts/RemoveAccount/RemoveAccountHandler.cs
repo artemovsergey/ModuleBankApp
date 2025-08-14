@@ -10,7 +10,9 @@ public class RemoveAccountHandler(IAccountRepository repo, ILogger<RemoveAccount
     public async Task<MbResult<Account>> Handle(RemoveAccountRequest request, CancellationToken ct)
     {
         var result = await repo.RemoveAccount(request.AccountId);
-        logger.LogInformation($"Remove account {result.Id}");
+        logger.LogInformation("Remove account {Id}", result.Id);
         return MbResult<Account>.Success(result);
     }
 }
+
+// +

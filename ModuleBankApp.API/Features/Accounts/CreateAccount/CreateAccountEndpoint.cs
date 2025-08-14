@@ -5,8 +5,9 @@ using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Features.Accounts.CreateAccount;
 
-public static class CreateAccountFunction
+public static class CreateAccountEndpoint
 {
+    // ReSharper disable once UnusedMember.Global
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapPost("/account", HandleEndpoint)
@@ -28,13 +29,16 @@ public static class CreateAccountFunction
         ClaimsPrincipal user)
     {
         var ownerId = user.GetOwnerIdFromClaims();
-        if (ownerId is null) return Results.Unauthorized();
+        if (ownerId == Guid.Empty) return Results.Unauthorized();
 
         var request = new CreateAccountRequest(createAccountDto, ownerId);
         var response = await mediator.Send(request);
 
         return response.IsSuccess
-            ? Results.Created($"/account/{response.Value.Id}", response.Value)
+            ? Results.CreatedAtRoute("GetAccount","/account/{response.Value.Id}", response.Value)
+            // ? Results.Created($"/account/{response.Value.Id}", response.Value)
             : Results.BadRequest(response);
     }
 }
+
+// +

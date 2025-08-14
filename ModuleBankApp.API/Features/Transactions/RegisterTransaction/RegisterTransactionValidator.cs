@@ -3,6 +3,7 @@ using ModuleBankApp.API.Services;
 
 namespace ModuleBankApp.API.Features.Transactions.RegisterTransaction;
 
+// ReSharper disable once UnusedType.Global
 public class RegisterTransactionValidator : AbstractValidator<RegisterTransactionRequest>
 {
     public RegisterTransactionValidator(ICurrencyService currencyService)
@@ -24,7 +25,7 @@ public class RegisterTransactionValidator : AbstractValidator<RegisterTransactio
             .WithMessage("Currency code must be 3 characters long.")
             .Must(currencyService.IsValidCurrencyCode)
             .WithMessage("Invalid currency code. Please provide a valid ISO 4217 currency code.");
-
-  
     }
 }
+
+// +

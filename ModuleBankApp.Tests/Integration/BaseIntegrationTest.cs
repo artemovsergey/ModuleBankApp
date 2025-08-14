@@ -1,13 +1,21 @@
-namespace ModuleBankApp.Tests;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using ModuleBankApp.API.Data;
+using Xunit;
+
+namespace ModuleBankApp.Tests.Integration;
 
 public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestApplicationFactory>
 {
-    private readonly IServiceScope _scope;
     protected readonly ISender Sender;
+    protected readonly ModuleBankAppContext ModuleBankAppContext;
 
     protected BaseIntegrationTest(IntegrationTestApplicationFactory factory)
     {
-        _scope = factory.Services.CreateScope();
-        Sender = _scope.ServiceProvider.GetRequiredService<ISender>();
+        var scope = factory.Services.CreateScope();
+        Sender = scope.ServiceProvider.GetRequiredService<ISender>();
+        ModuleBankAppContext = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
     }
 }
+
+// +

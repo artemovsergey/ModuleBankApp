@@ -1,61 +1,31 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using ModuleBankApp.API.Data.Interfaces;
+using ModuleBankApp.API.Options;
 using RabbitMQ.Client;
 
 namespace ModuleBankApp.API.Services;
 
-public class RabbitMqEventBus : IEventBus, IDisposable
+public class RabbitMqEventBus : IEventBus
 {
-    private readonly IConnection _connection;
-    private readonly IChannel _channel;
+    private readonly IRabbitMqConnectionService _connection;
+    private readonly RabbitMqOptions _options;
 
-    private RabbitMqEventBus(IConnection connection, IChannel channel)
+    public RabbitMqEventBus(IRabbitMqConnectionService connection, IOptions<RabbitMqOptions> options)
     {
         _connection = connection;
-        _channel = channel;
+        _options = options.Value;
     }
 
-    public static async Task<RabbitMqEventBus> CreateAsync(
-        string user, string pass, string vhost, string hostName)
-    {
-        var factory = new ConnectionFactory
-        {
-            UserName = user,
-            Password = pass,
-            VirtualHost = vhost,
-            HostName = hostName
-        };
-
-        var conn = await factory.CreateConnectionAsync();
-        var channel = await conn.CreateChannelAsync();
-        
-        await channel.ExchangeDeclareAsync("accounts", ExchangeType.Fanout, durable: true);
-        await channel.QueueDeclareAsync(
-            queue: "accounts_queue",
-            durable: true,       // очередь выживает после рестарта брокера
-            exclusive: false,    // очередь может использоваться другими подключениями
-            autoDelete: false,   // очередь не удаляется автоматически
-            arguments: null
-        );
-        await channel.QueueBindAsync("accounts_queue", "accounts", "");
-        
-        return new RabbitMqEventBus(conn, channel);
-    }
-    
     public async Task PublishAsync<T>(T @event, CancellationToken cancellationToken = default)
     {
-        var exchange = "accounts";
+        using var channel = await _connection.CreateChannelAsync();
+        await channel.ExchangeDeclareAsync(_options.ExchangeName, ExchangeType.Fanout, durable: true);
+
         var json = JsonSerializer.Serialize(@event);
         var body = Encoding.UTF8.GetBytes(json).AsMemory();
 
-        await _channel.BasicPublishAsync(exchange,"", body, cancellationToken: cancellationToken);
-        
-    }
-
-    public void Dispose()
-    {
-        _channel?.Dispose();
-        _connection?.Dispose();
+        await channel.BasicPublishAsync(_options.ExchangeName, "", body, cancellationToken: cancellationToken);
     }
 }

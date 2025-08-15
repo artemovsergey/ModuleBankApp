@@ -68,6 +68,11 @@ public sealed class Account
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     // ReSharper disable once UnusedMember.Global
     //public uint xmin { get; set; }
+    
+    /// <summary>
+    /// Флаг заморозки счета
+    /// </summary>
+    public bool IsFrozen { get; set; }
 }
 
 public enum AccountType

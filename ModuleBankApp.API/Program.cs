@@ -14,7 +14,10 @@ using ModuleBankApp.API.Metrics;
 using ModuleBankApp.API.Services;
 using Hangfire;
 using Hangfire.PostgreSql;
+using ModuleBankApp.API.Features.Accounts.Consumers;
 using ModuleBankApp.API.Filters;
+using ModuleBankApp.API.Options;
+using RabbitMQ.Client;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,8 +76,12 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddTransient<InterestJobService>();
 
-builder.Services.AddSingleton<IEventBus>(sp =>
-    RabbitMqEventBus.CreateAsync("guest", "guest", "/", "rabbitmq").GetAwaiter().GetResult());
+
+builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
+builder.Services.AddSingleton<IRabbitMqConnectionService, RabbitMqConnectionService>();
+
+builder.Services.AddSingleton<IEventBus, RabbitMqEventBus>();
+builder.Services.AddHostedService<AntifraudConsumer>();
 
 var app = builder.Build();
 

@@ -12,6 +12,7 @@ public record AccountDto(
     DateTime CreatedAt,
     DateTime? ClosedAt,
     Guid OwnerId,
+    bool IsFrozen,
     List<TransactionDto> Transactions
 );
 

@@ -30,6 +30,14 @@ public class AccountRepository(ModuleBankAppContext db) : IAccountRepository
         return acc;
     }
 
+    public async Task<Account> FreezeAccount(Guid clientId, bool isFrozen)
+    {
+        var c = await db.Accounts.Where(a => a.OwnerId == clientId).FirstOrDefaultAsync();
+        c!.IsFrozen = isFrozen;
+        await db.SaveChangesAsync();
+        return c;
+    }
+
     public async Task<List<Account>> GetAllAccounts()
     {
         return await db.Accounts.ToListAsync();

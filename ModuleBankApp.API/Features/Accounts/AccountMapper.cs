@@ -15,6 +15,7 @@ public static class AccountMapper
             entity.CreatedAt,
             entity.ClosedAt,
             entity.OwnerId,
+            entity.IsFrozen,
             entity.Transactions.Select(t => t.ToDto()).ToList()
         );
     }

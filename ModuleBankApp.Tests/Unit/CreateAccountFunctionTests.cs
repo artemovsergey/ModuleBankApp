@@ -68,6 +68,7 @@ public class CreateAccountFunctionTests
         // Arrange
         var mockRepo = new Mock<IAccountRepository>();
         var mockLogger = new Mock<ILogger<CreateAccountHandler>>();
+        var mockBus = new Mock<IEventBus>();
 
         var account = new Account
         {
@@ -84,7 +85,7 @@ public class CreateAccountFunctionTests
         mockRepo.Setup(r => r.CreateAccount(It.IsAny<Account>()))
             .ReturnsAsync(account);
 
-        var handler = new CreateAccountHandler(mockRepo.Object, mockLogger.Object);
+        var handler = new CreateAccountHandler(mockRepo.Object, mockLogger.Object, mockBus.Object);
         
         var request = new CreateAccountRequest(_validAccountDto, account.OwnerId);
 

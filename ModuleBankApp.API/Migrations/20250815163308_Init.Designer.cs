@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModuleBankApp.API.Migrations
 {
     [DbContext(typeof(ModuleBankAppContext))]
-    [Migration("20250810223927_Init")]
+    [Migration("20250815163308_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -61,6 +61,12 @@ namespace ModuleBankApp.API.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<uint>("xmin")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
 
                     b.HasKey("Id");
 

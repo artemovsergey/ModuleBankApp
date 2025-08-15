@@ -43,7 +43,7 @@ public class CreateAccountValidator : AbstractValidator<CreateAccountRequest>
         When(x => x.CreateAccountDto.Type == AccountType.Credit, () =>
         {
             RuleFor(x => x.CreateAccountDto.Balance)
-                .NotNull()
+                .LessThanOrEqualTo(0)
                 .WithMessage("Credit account must have negative or zero balance");
         });
     }

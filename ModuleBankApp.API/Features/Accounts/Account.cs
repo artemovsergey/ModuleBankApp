@@ -64,14 +64,10 @@ public sealed class Account
     ///
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public Guid OwnerId { get; set; }
-
-    /// <summary>
-    /// concurrency-token для оптимистичной блокировки (PostgreSQL xmin)
-    /// </summary>
-    ///
+    
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     // ReSharper disable once UnusedMember.Global
-    public uint Xmin { get; set; }
+    //public uint xmin { get; set; }
 }
 
 public enum AccountType

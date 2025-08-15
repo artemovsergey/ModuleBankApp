@@ -73,6 +73,9 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddTransient<InterestJobService>();
 
+builder.Services.AddSingleton<IEventBus>(sp =>
+    RabbitMqEventBus.CreateAsync("guest", "guest", "/", "rabbitmq").GetAwaiter().GetResult());
+
 var app = builder.Build();
 
 
@@ -130,6 +133,8 @@ app.Run();
 
 // ReSharper disable once ClassNeverInstantiated.Global
 // ReSharper disable once RedundantTypeDeclarationBody
-public partial class Program {  }
+public partial class Program
+{
+}
 
 // +

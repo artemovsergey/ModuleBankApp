@@ -29,7 +29,8 @@ namespace ModuleBankApp.API.Migrations
                     InterestRate = table.Column<decimal>(type: "numeric(5,2)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     ClosedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    OwnerId = table.Column<Guid>(type: "uuid", nullable: false)
+                    OwnerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    xmin = table.Column<uint>(type: "xid", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {

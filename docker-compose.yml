@@ -7,6 +7,18 @@ volumes:
   hangfire_postgres_data:
   
 services:
+  
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ModuleBankAppRabbitMQ
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Web UI
+    networks:
+      - network
     
   api:
     container_name: ModulBankAppAPI
@@ -25,6 +37,7 @@ services:
     depends_on:
        - keycloak
        - db
+       - rabbitmq
   db:
     image: postgres:latest
     container_name: ModuleBankAppPostgreSQL

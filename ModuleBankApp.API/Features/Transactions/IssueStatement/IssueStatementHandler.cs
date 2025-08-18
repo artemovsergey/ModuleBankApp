@@ -1,5 +1,6 @@
 using MediatR;
 using ModuleBankApp.API.Data.Interfaces;
+using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Features.Transactions.IssueStatement;

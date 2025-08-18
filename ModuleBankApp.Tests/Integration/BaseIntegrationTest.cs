@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using ModuleBankApp.API.Data;
+using ModuleBankApp.API.Infrastructure.Data;
 using Xunit;
 
 namespace ModuleBankApp.Tests.Integration;

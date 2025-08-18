@@ -1,4 +1,7 @@
 // ReSharper disable UnusedAutoPropertyAccessor.Global
+
+using ModuleBankApp.API.Domen;
+
 namespace ModuleBankApp.API.Features.Accounts.EditAccount;
 
 /// <summary>

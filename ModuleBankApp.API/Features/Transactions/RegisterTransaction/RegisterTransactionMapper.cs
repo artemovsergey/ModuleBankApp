@@ -1,3 +1,6 @@
+using ModuleBankApp.API.Domen;
+using ModuleBankApp.API.Dtos;
+
 namespace ModuleBankApp.API.Features.Transactions.RegisterTransaction;
 
 // ReSharper disable once UnusedType.Global

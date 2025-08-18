@@ -1,4 +1,5 @@
 using MediatR;
+using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Generic;
 
 namespace ModuleBankApp.API.Features.Accounts.EditAccount;

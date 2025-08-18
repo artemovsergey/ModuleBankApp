@@ -5,6 +5,7 @@
 volumes:
   postgres_data:
   hangfire_postgres_data:
+  rabbitmq_data:
   
 services:
   
@@ -34,6 +35,8 @@ services:
       - "80:80"
     networks:
       - network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
     depends_on:
        - keycloak
        - db

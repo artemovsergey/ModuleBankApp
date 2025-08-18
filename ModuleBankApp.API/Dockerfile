@@ -20,5 +20,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-COPY ./ModuleBankApp.API/Data/Procedures/accrue_interest.sql /app/Data/Procedures/accrue_interest.sql
+COPY ./ModuleBankApp.API/Infrastructure/Data/Procedures/accrue_interest.sql /app/Infrastructure/Data/Procedures/accrue_interest.sql
 ENTRYPOINT ["dotnet", "ModuleBankApp.API.dll"]

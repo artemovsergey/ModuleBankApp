@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using MediatR;
+using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Extensions;
 using ModuleBankApp.API.Generic;
 
@@ -35,7 +36,7 @@ public static class CreateAccountEndpoint
         var response = await mediator.Send(request);
 
         return response.IsSuccess
-            ? Results.CreatedAtRoute("GetAccount", new { accountId = response.Value.Id }, response.Value)
+            ? Results.CreatedAtRoute("GetAccount", new { accountId = response.Value.Id }, response.Value.ToDto())
             // ? Results.Created($"/account/{response.Value.Id}", response.Value)
             : Results.BadRequest(response);
     }

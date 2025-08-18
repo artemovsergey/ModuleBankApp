@@ -3,7 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ModuleBankApp.API.Data;
+using ModuleBankApp.API.Infrastructure.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -23,7 +23,7 @@ namespace ModuleBankApp.API.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gist");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ModuleBankApp.API.Features.Accounts.Account", b =>
+            modelBuilder.Entity("ModuleBankApp.API.Domen.Account", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -81,7 +81,7 @@ namespace ModuleBankApp.API.Migrations
                     b.ToTable("Accounts", "public");
                 });
 
-            modelBuilder.Entity("ModuleBankApp.API.Features.Transactions.Transaction", b =>
+            modelBuilder.Entity("ModuleBankApp.API.Domen.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -134,9 +134,82 @@ namespace ModuleBankApp.API.Migrations
                     b.ToTable("Transactions", "public");
                 });
 
-            modelBuilder.Entity("ModuleBankApp.API.Features.Transactions.Transaction", b =>
+            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Inbox.InboxMessage", b =>
                 {
-                    b.HasOne("ModuleBankApp.API.Features.Accounts.Account", "Account")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Processed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("ReceivedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Inbox");
+                });
+
+            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CausationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastAttemptAtUtc")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTimeOffset>("OccurredAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("PublishAttempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status", "CreatedAtUtc");
+
+                    b.ToTable("outbox_messages", (string)null);
+                });
+
+            modelBuilder.Entity("ModuleBankApp.API.Domen.Transaction", b =>
+                {
+                    b.HasOne("ModuleBankApp.API.Domen.Account", "Account")
                         .WithMany("Transactions")
                         .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -145,7 +218,7 @@ namespace ModuleBankApp.API.Migrations
                     b.Navigation("Account");
                 });
 
-            modelBuilder.Entity("ModuleBankApp.API.Features.Accounts.Account", b =>
+            modelBuilder.Entity("ModuleBankApp.API.Domen.Account", b =>
                 {
                     b.Navigation("Transactions");
                 });

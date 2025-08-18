@@ -1,3 +1,5 @@
+using ModuleBankApp.API.Domen;
+
 namespace ModuleBankApp.API.Features.Accounts.CreateAccount;
 
 public record CreateAccountDto(
@@ -6,5 +8,3 @@ public record CreateAccountDto(
     decimal Balance,
     decimal? InterestRate
 );
-
-// +

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.PostgreSql;
+using ModuleBankApp.API.Infrastructure.Data;
 using Testcontainers.PostgreSql;
 using Xunit;
 

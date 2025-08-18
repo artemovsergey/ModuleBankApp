@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using MediatR;
+using ModuleBankApp.API.Domen;
+using ModuleBankApp.API.Dtos;
 using ModuleBankApp.API.Extensions;
 using ModuleBankApp.API.Generic;
 

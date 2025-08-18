@@ -1,3 +1,5 @@
+using ModuleBankApp.API.Domen;
+
 namespace ModuleBankApp.API.Features.Accounts.EditAccount;
 
 public static class EditAccountMapper

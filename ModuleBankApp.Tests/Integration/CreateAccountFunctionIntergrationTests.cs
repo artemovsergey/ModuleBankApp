@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Features.Accounts;
 using ModuleBankApp.API.Features.Accounts.CreateAccount;
 using Xunit;

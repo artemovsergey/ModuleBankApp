@@ -3,13 +3,18 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
+using ModuleBankApp.API.Data;
 using ModuleBankApp.API.Data.Interfaces;
+using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Features.Accounts;
 using Moq;
 using ModuleBankApp.API.Features.Accounts.CreateAccount;
 using ModuleBankApp.API.Generic;
+using ModuleBankApp.API.Infrastructure.Data;
+using ModuleBankApp.API.Infrastructure.Data.Interfaces;
 using Xunit;
 
 namespace ModuleBankApp.Tests.Unit;
@@ -69,6 +74,9 @@ public class CreateAccountFunctionTests
         var mockRepo = new Mock<IAccountRepository>();
         var mockLogger = new Mock<ILogger<CreateAccountHandler>>();
         var mockBus = new Mock<IEventBus>();
+        var mockClock = new Mock<TimeProvider>();
+        var mockContext = new Mock<ModuleBankAppContext>();
+        var mockAccessor = new Mock<IHttpContextAccessor>(); 
 
         var account = new Account
         {
@@ -85,7 +93,7 @@ public class CreateAccountFunctionTests
         mockRepo.Setup(r => r.CreateAccount(It.IsAny<Account>()))
             .ReturnsAsync(account);
 
-        var handler = new CreateAccountHandler(mockRepo.Object, mockLogger.Object, mockBus.Object);
+        var handler = new CreateAccountHandler(mockRepo.Object, mockLogger.Object, mockContext.Object, mockAccessor.Object);
         
         var request = new CreateAccountRequest(_validAccountDto, account.OwnerId);
 

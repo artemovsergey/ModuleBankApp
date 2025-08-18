@@ -9,18 +9,13 @@
 
 ![usecase.drawio.png](images/usecase.drawio.png)
 
-
-# Запуск локально
-
-```dotnet run -- project ModuleBankApp.API ```
-
 # Запуск в docker
 
 ```
 docker-compose up --build
 ```
 **Замечание**: загрузка сервиса аутентификации `Keycloak` может занять некоторое время,
-т.к. будет происходить конфигурация.
+т.к. будет происходить конфигурация пользователя
 
 # Swagger
 

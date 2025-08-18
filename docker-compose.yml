@@ -20,6 +20,11 @@ services:
       - "15672:15672" # Web UI
     networks:
       - network
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
   api:
     container_name: ModulBankAppAPI
@@ -38,9 +43,8 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     depends_on:
-       - keycloak
-       - db
-       - rabbitmq
+      rabbitmq:
+        condition: service_healthy
   db:
     image: postgres:latest
     container_name: ModuleBankAppPostgreSQL

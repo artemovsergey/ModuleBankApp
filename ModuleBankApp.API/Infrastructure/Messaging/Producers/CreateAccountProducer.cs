@@ -7,9 +7,12 @@ using Polly;
 
 namespace ModuleBankApp.API.Infrastructure.Messaging.Producers;
 
-public class CreateAccountProducer(IEventBus eventBus, ILogger<CreateAccountProducer> logger, IServiceScopeFactory scopedFactory) : BackgroundService
+public class CreateAccountProducer(IEventBus eventBus,
+                                   ILogger<CreateAccountProducer> logger,
+                                   IServiceScopeFactory scopedFactory) : BackgroundService
 {
     private static readonly Random Random = new Random();
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
@@ -93,3 +96,15 @@ public class CreateAccountProducer(IEventBus eventBus, ILogger<CreateAccountProd
         }
     }
 }
+
+
+/*
+
+- Задержка Task.Delay(20s) фиксированная → это значит,
+что при большом потоке событий будут задержки. 
+Лучше использовать polling interval на основе нагрузки или механизм CDC (Change Data Capture).
+
+- При переводе в Failed событие фактически теряется
+(нет ретраев в будущем). Лучше сделать стратегию "Dead Letter" или "Requeue".
+
+*/

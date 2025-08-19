@@ -17,8 +17,6 @@ using ModuleBankApp.API.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
-
-
 builder.Host.AddSerilogConfiguration(config);
 builder.Services.AddSwaggerServices();
 builder.Services.AddSerializeServices();
@@ -50,15 +48,15 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.AddHangfireServices(config);
-builder.Services.AddRabbitMqServices(config);
+builder.Services.AddEventBusServices(config);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHealthCheckServices(config);
 
 var app = builder.Build();
 
-var connection = app.Services.GetRequiredService<IRabbitMqConnectionService>();
-await RabbitMqSetup.SetupQueuesAsync(connection, "account.events");
+var connection = app.Services.GetRequiredService<IEventBusConnectionService>();
+await EventBusSetup.SetupQueuesAsync(connection, "account.events");
 
 app.UseMiddleware<CorrelationIdMiddleware>();
 if (app.Environment.IsProduction())

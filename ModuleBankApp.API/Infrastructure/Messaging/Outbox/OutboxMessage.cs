@@ -15,3 +15,11 @@ public sealed class OutboxMessage : IHasCorrelation, IHasCausation
     public Guid CorrelationId { get; set; }
     public Guid CausationId { get; set; }
 }
+
+public enum OutboxStatus : short
+{
+    Pending = 0,
+    InProgress = 1,
+    Published = 2,
+    Failed = 3
+}

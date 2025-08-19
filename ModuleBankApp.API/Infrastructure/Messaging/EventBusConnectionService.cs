@@ -4,16 +4,15 @@
 
     namespace ModuleBankApp.API.Infrastructure.Messaging;
 
-    public interface IRabbitMqConnectionService : IDisposable
+    public interface IEventBusConnectionService : IDisposable
     {
         Task<IChannel> CreateChannelAsync();
     }
 
-    public class RabbitMqConnectionService : IRabbitMqConnectionService, IDisposable
+    public class EventBusConnectionService : IEventBusConnectionService
     {
         private readonly IConnection _connection;
-
-        public RabbitMqConnectionService(IOptions<RabbitMqOptions> options)
+        public EventBusConnectionService(IOptions<EventBusOptions> options)
         {
             var factory = new ConnectionFactory
             {
@@ -22,9 +21,8 @@
                 Password = options.Value.Password,
                 VirtualHost = options.Value.VirtualHost
             };
-
-            // одно соединение на всё приложение
-            //_connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
+            
+            _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
         }
 
         public async Task<IChannel> CreateChannelAsync()
@@ -37,7 +35,6 @@
                 VirtualHost = "/"
             };
             
-            // каждый вызов возвращает новый канал
             var channel = factory.CreateConnectionAsync().GetAwaiter().GetResult().CreateChannelAsync();
             return await channel;
         }

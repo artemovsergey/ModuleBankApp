@@ -5,6 +5,7 @@ using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Generic;
 using ModuleBankApp.API.Infrastructure.Data;
 using ModuleBankApp.API.Infrastructure.Data.Interfaces;
+using ModuleBankApp.API.Infrastructure.Messaging;
 using ModuleBankApp.API.Infrastructure.Messaging.Outbox;
 
 namespace ModuleBankApp.API.Features.Accounts.CreateAccount;
@@ -45,13 +46,11 @@ public class CreateAccountHandler(
         logger.LogInformation("Creating account {Id} for user {OwnerId}", savedAccount.Id, savedAccount.OwnerId);
 
         var httpContext = httpContextAccessor.HttpContext;
-
         Guid.TryParse(httpContext?.Items["X-Correlation-Id"]?.ToString(), out var correlationId);
-
         var causationId = request.ClaimsId ?? Guid.NewGuid();
 
-        // конверт как пакет сообщения для rabbit
-        var envelope = IntegrationEventEnvelope<AccountOpened>.Create(
+        // конверт как пакет сообщения для rabbit - шины сообщений
+        var envelope = EventEnvelope<AccountOpened>.Create(
             payload: @event,
             source: "account-service",
             correlationId: correlationId,

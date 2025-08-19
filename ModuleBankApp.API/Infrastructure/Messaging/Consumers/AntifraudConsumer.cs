@@ -8,23 +8,17 @@ using RabbitMQ.Client.Events;
 
 namespace ModuleBankApp.API.Infrastructure.Messaging.Consumers;
 
-public class AntifraudConsumer : BackgroundService
+public class AntifraudConsumer(
+    IServiceScopeFactory scopeFactory,
+    IEventBusConnectionService connection,
+    IOptions<EventBusOptions> options)
+    : BackgroundService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly IRabbitMqConnectionService _connection;
-    private readonly RabbitMqOptions _options;
-
-    public AntifraudConsumer(IServiceScopeFactory scopeFactory, IRabbitMqConnectionService connection,
-        IOptions<RabbitMqOptions> options)
-    {
-        _scopeFactory = scopeFactory;
-        _connection = connection;
-        _options = options.Value;
-    }
+    private readonly EventBusOptions _options = options.Value;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var channel = await _connection.CreateChannelAsync();
+        var channel = await connection.CreateChannelAsync();
         await channel.ExchangeDeclareAsync(_options.ExchangeName, ExchangeType.Topic, durable: true);
         await channel.QueueDeclareAsync("account.antifraud", durable: true, exclusive: false, autoDelete: false);
         await channel.QueueBindAsync("account.antifraud", _options.ExchangeName, "");
@@ -35,7 +29,7 @@ public class AntifraudConsumer : BackgroundService
             var message = Encoding.UTF8.GetString(ea.Body.ToArray());
             var evt = JsonSerializer.Deserialize<AntifraudEvent>(message);
 
-            using var scope = _scopeFactory.CreateScope();
+            using var scope = scopeFactory.CreateScope();
             var repo = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
 
             if (evt?.Action == "client.blocked")

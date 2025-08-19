@@ -7,15 +7,16 @@ using RabbitMQ.Client;
 
 namespace ModuleBankApp.API.Infrastructure.Messaging;
 
-public class RabbitMqEventBus(IRabbitMqConnectionService connection, IOptions<RabbitMqOptions> options)
+public class EventBus(IEventBusConnectionService eventBusService,
+                      IOptions<EventBusOptions> options)
     : IEventBus
 {
-    private readonly RabbitMqOptions _options = options.Value;
+    private readonly EventBusOptions _options = options.Value;
 
     // отправляет сообщение в очередь (exchange) в Rabbit
     public async Task PublishAsync<T>(T @event, CancellationToken cancellationToken = default)
     {
-        await using var channel = await connection.CreateChannelAsync();
+        await using var channel = await eventBusService.CreateChannelAsync();
 
         // //Exchange
         // await channel.ExchangeDeclareAsync(

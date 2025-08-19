@@ -1,6 +1,6 @@
 namespace ModuleBankApp.API.Infrastructure.Messaging.Options;
 
-public class RabbitMqOptions
+public class EventBusOptions
 {
     public string HostName { get; set; } = "rabbitmq";
     public string UserName { get; set; } = "guest";

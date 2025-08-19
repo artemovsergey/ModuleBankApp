@@ -1,4 +1,4 @@
-namespace ModuleBankApp.API.Infrastructure.Messaging.Outbox;
+namespace ModuleBankApp.API.Infrastructure.Messaging;
 
 public sealed record Meta(
     string Version,
@@ -7,20 +7,20 @@ public sealed record Meta(
     Guid CausationId
 );
 
-public sealed record IntegrationEventEnvelope<TPayload>(
+public sealed record EventEnvelope<TPayload>(
     Guid EventId,
     string OccurredAt,   // ISO-8601 строка с суффиксом "Z"
     TPayload Payload,
     Meta Meta
 )
 {
-    public static IntegrationEventEnvelope<TPayload> Create(
+    public static EventEnvelope<TPayload> Create(
         TPayload payload,
         string source,
         Guid correlationId,
         Guid causationId)
     {
-        return new IntegrationEventEnvelope<TPayload>(
+        return new EventEnvelope<TPayload>(
             EventId: Guid.NewGuid(),
             OccurredAt: DateTime.UtcNow.ToString("O"), // всегда ISO-8601 с Z
             Payload: payload,
@@ -33,6 +33,3 @@ public sealed record IntegrationEventEnvelope<TPayload>(
         );
     }
 }
-
-
-// что это и зачем нужно?

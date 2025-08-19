@@ -2,9 +2,11 @@ using RabbitMQ.Client;
 
 namespace ModuleBankApp.API.Infrastructure.Messaging;
 
-public static class RabbitMqSetup
+public static class EventBusSetup
 {
-    public static async Task SetupQueuesAsync(IRabbitMqConnectionService connection, string exchangeName, CancellationToken ct = default)
+    public static async Task SetupQueuesAsync(IEventBusConnectionService connection,
+                                              string exchangeName,
+                                              CancellationToken ct = default)
     {
         await using var channel = await connection.CreateChannelAsync();
     

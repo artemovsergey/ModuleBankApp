@@ -32,10 +32,10 @@ public static class HealthCheckServices
 
 public class RabbitMqHealthCheck : IHealthCheck
 {
-    private readonly IOptions<RabbitMqOptions> _options;
+    private readonly IOptions<EventBusOptions> _options;
     private readonly ILogger<RabbitMqHealthCheck> _logger;
 
-    public RabbitMqHealthCheck(IOptions<RabbitMqOptions> options, ILogger<RabbitMqHealthCheck> logger)
+    public RabbitMqHealthCheck(IOptions<EventBusOptions> options, ILogger<RabbitMqHealthCheck> logger)
     {
         _options = options;
         _logger = logger;
@@ -47,7 +47,7 @@ public class RabbitMqHealthCheck : IHealthCheck
     {
         try
         {
-            var rmqConnection = new RabbitMqConnectionService(_options);
+            var rmqConnection = new EventBusConnectionService(_options);
             var rmqChannel = await rmqConnection.CreateChannelAsync();
             await rmqChannel.CloseAsync();
 

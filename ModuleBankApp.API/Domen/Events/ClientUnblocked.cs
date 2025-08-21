@@ -1,0 +1,13 @@
+namespace ModuleBankApp.API.Domen.Events;
+
+/// <summary>
+/// Разблокирование всех счетов клиента
+/// </summary>
+/// <param name="EventId"> Идентификатор события</param>
+/// <param name="OccurredAt"> Дата</param>
+/// <param name="ClientId"> Идентификатор клиента</param>
+public record ClientUnblocked(
+    Guid EventId,
+    DateTime OccurredAt,
+    Guid ClientId
+);

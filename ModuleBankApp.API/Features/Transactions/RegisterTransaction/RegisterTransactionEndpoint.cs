@@ -42,5 +42,3 @@ public static class RegisterTransactionEndpoint
             : Results.BadRequest(response.Error);
     }
 }
-
-// +

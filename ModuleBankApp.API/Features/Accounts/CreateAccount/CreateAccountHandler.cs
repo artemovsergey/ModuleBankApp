@@ -5,16 +5,14 @@ using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Generic;
 using ModuleBankApp.API.Infrastructure.Data;
 using ModuleBankApp.API.Infrastructure.Data.Interfaces;
-using ModuleBankApp.API.Infrastructure.Messaging;
-using ModuleBankApp.API.Infrastructure.Messaging.Outbox;
+using ModuleBankApp.API.Infrastructure.Messaging.Models;
 
 namespace ModuleBankApp.API.Features.Accounts.CreateAccount;
 
 public class CreateAccountHandler(
     IAccountRepository repo,
     ILogger<CreateAccountHandler> logger,
-    ModuleBankAppContext db,
-    IHttpContextAccessor httpContextAccessor)
+    ModuleBankAppContext db)
     : IRequestHandler<CreateAccountRequest, MbResult<Account>>
 {
     public async Task<MbResult<Account>> Handle(CreateAccountRequest request, CancellationToken ct)
@@ -22,13 +20,11 @@ public class CreateAccountHandler(
         // ReSharper disable once RedundantEmptyObjectCreationArgumentList
         var account = new Account()
         {
-            Id = Guid.NewGuid(),
-            CreatedAt = DateTime.UtcNow,
             Type = request.CreateAccountDto.Type,
             Balance = request.CreateAccountDto.Balance,
             InterestRate = request.CreateAccountDto.InterestRate,
             Currency = request.CreateAccountDto.Currency,
-            OwnerId = (Guid)request.ClaimsId! // from jwt::sub
+            OwnerId = (Guid)request.ClaimsId!
         };
 
         var @event = new AccountOpened(
@@ -43,28 +39,13 @@ public class CreateAccountHandler(
         await using var tx = await db.Database.BeginTransactionAsync(ct);
 
         var savedAccount = await repo.CreateAccount(account);
-        logger.LogInformation("Creating account {Id} for user {OwnerId}", savedAccount.Id, savedAccount.OwnerId);
-
-        var httpContext = httpContextAccessor.HttpContext;
-        Guid.TryParse(httpContext?.Items["X-Correlation-Id"]?.ToString(), out var correlationId);
-        var causationId = request.ClaimsId ?? Guid.NewGuid();
-
-        // конверт как пакет сообщения для rabbit - шины сообщений
-        var envelope = EventEnvelope<AccountOpened>.Create(
-            payload: @event,
-            source: "account-service",
-            correlationId: correlationId,
-            causationId: causationId
-        );
-
+        logger.LogInformation("\n Creating account {Id} for user {OwnerId} \n", savedAccount.Id, savedAccount.OwnerId);
+        
         await db.Outbox.AddAsync(new OutboxMessage
         {
-            Id = envelope.EventId,
             Type = nameof(AccountOpened),
-            Payload = JsonSerializer.Serialize(envelope),
-            OccurredAtUtc = DateTimeOffset.UtcNow,
-            Status = OutboxStatus.Pending,
-            CorrelationId = correlationId
+            Payload = JsonSerializer.Serialize(@event),
+            Status = OutboxStatus.Pending
         }, ct);
 
         await db.SaveChangesAsync(ct);

@@ -1,6 +1,6 @@
 namespace ModuleBankApp.API.Infrastructure.Data.Interfaces;
 
-public interface IEventBus
+public interface IEventBusService
 {
-    Task PublishAsync<T>(T @event, CancellationToken cancellationToken = default);
+    Task PublishAsync<T>(T @event, string routekey, CancellationToken cancellationToken = default);
 }

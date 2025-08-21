@@ -10,7 +10,7 @@ namespace ModuleBankApp.API.Infrastructure.Messaging.Consumers;
 
 public class AntifraudConsumer(
     IServiceScopeFactory scopeFactory,
-    IEventBusConnectionService connection,
+    IEventBusConnection connection,
     IOptions<EventBusOptions> options)
     : BackgroundService
 {

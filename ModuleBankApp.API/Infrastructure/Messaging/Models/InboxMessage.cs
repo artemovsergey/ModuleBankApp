@@ -1,4 +1,4 @@
-namespace ModuleBankApp.API.Infrastructure.Messaging.Inbox;
+namespace ModuleBankApp.API.Infrastructure.Messaging.Models;
 
 public sealed class InboxMessage
 {

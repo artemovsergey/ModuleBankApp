@@ -8,7 +8,6 @@ public sealed record Meta(
 );
 
 public sealed record EventEnvelope<TPayload>(
-    Guid EventId,
     string OccurredAt,   // ISO-8601 строка с суффиксом "Z"
     TPayload Payload,
     Meta Meta
@@ -21,8 +20,7 @@ public sealed record EventEnvelope<TPayload>(
         Guid causationId)
     {
         return new EventEnvelope<TPayload>(
-            EventId: Guid.NewGuid(),
-            OccurredAt: DateTime.UtcNow.ToString("O"), // всегда ISO-8601 с Z
+            OccurredAt: DateTime.UtcNow.ToString("O"),
             Payload: payload,
             Meta: new Meta(
                 Version: "v1",

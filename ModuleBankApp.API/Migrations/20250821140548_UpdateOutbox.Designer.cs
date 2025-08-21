@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ModuleBankApp.API.Infrastructure.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModuleBankApp.API.Migrations
 {
     [DbContext(typeof(ModuleBankAppContext))]
-    partial class ModuleBankAppContextModelSnapshot : ModelSnapshot
+    [Migration("20250821140548_UpdateOutbox")]
+    partial class UpdateOutbox
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,29 +137,7 @@ namespace ModuleBankApp.API.Migrations
                     b.ToTable("Transactions", "public");
                 });
 
-            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Models.AuditMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Payload")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<DateTimeOffset>("ReceivedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("audit_messages", (string)null);
-                });
-
-            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Models.InboxMessage", b =>
+            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Inbox.InboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -181,10 +162,34 @@ namespace ModuleBankApp.API.Migrations
                     b.ToTable("inbox_messages", (string)null);
                 });
 
-            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Models.OutboxMessage", b =>
+            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Models.AuditMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTimeOffset>("ReceivedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("audit_messages", (string)null);
+                });
+
+            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CausationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CorrelationId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Payload")

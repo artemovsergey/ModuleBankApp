@@ -4,8 +4,8 @@ using Microsoft.Extensions.Options;
 using ModuleBankApp.API.Data;
 using ModuleBankApp.API.Infrastructure.Data;
 using ModuleBankApp.API.Infrastructure.Messaging;
+using ModuleBankApp.API.Infrastructure.Messaging.Models;
 using ModuleBankApp.API.Infrastructure.Messaging.Options;
-using ModuleBankApp.API.Infrastructure.Messaging.Outbox;
 using ModuleBankApp.API.Services;
 using RabbitMQ.Client;
 
@@ -47,7 +47,7 @@ public class RabbitMqHealthCheck : IHealthCheck
     {
         try
         {
-            var rmqConnection = new EventBusConnectionService(_options);
+            var rmqConnection = new EventBusConnection(_options);
             var rmqChannel = await rmqConnection.CreateChannelAsync();
             await rmqChannel.CloseAsync();
 

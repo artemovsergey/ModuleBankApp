@@ -1,7 +1,7 @@
 using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Dtos;
 
-namespace ModuleBankApp.API.Features.Transactions;
+namespace ModuleBankApp.API.Mappers;
 
 public static class TransactionMapper
 {
@@ -11,7 +11,7 @@ public static class TransactionMapper
         return new TransactionDto()
         {
             AccountId = entity.AccountId,
-            CounterPartyAccountId = entity.CounterPartyAccountId,
+            CounterPartyAccountId = entity.CounterPartyAccountId ?? Guid.Empty,
             Currency = entity.Currency,
             Amount = entity.Amount,
             Type = entity.Type,
@@ -24,7 +24,7 @@ public static class TransactionMapper
         return new Transaction
         {
             AccountId = dto.AccountId,
-            CounterPartyAccountId = dto.CounterPartyAccountId,
+            CounterPartyAccountId = dto.CounterPartyAccountId ?? Guid.Empty,
             Currency = dto.Currency,
             Amount = dto.Amount,
             Type = dto.Type,

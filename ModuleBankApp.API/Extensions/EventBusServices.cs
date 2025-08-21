@@ -12,8 +12,8 @@ public static class EventBusServices
     {
         services.Configure<EventBusOptions>(config.GetSection("RabbitMq"));
         
-        services.AddSingleton<IEventBusConnectionService, EventBusConnectionService>();
-        services.AddSingleton<IEventBus, EventBus>();
+        services.AddSingleton<IEventBusConnection, EventBusConnection>();
+        services.AddSingleton<IEventBusService, EventBusService>();
         
         services.AddHostedService<AntifraudConsumer>();
         services.AddHostedService<CreateAccountProducer>();

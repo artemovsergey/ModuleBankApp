@@ -52,10 +52,10 @@ builder.Services.AddHealthCheckServices(config);
 
 var app = builder.Build();
 
-var connection = app.Services.GetRequiredService<IEventBusConnectionService>();
+var connection = app.Services.GetRequiredService<IEventBusConnection>();
 await EventBusSetup.SetupQueuesAsync(connection, "account.events");
 
-app.UseMiddleware<CorrelationIdMiddleware>();
+// app.UseMiddleware<CorrelationIdMiddleware>();
 if (app.Environment.IsProduction())
 {
     using var scope = app.Services.CreateScope();

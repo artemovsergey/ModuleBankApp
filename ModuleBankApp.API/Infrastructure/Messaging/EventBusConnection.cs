@@ -4,15 +4,15 @@
 
     namespace ModuleBankApp.API.Infrastructure.Messaging;
 
-    public interface IEventBusConnectionService : IDisposable
+    public interface IEventBusConnection : IDisposable
     {
         Task<IChannel> CreateChannelAsync();
     }
 
-    public class EventBusConnectionService : IEventBusConnectionService
+    public class EventBusConnection : IEventBusConnection
     {
         private readonly IConnection _connection;
-        public EventBusConnectionService(IOptions<EventBusOptions> options)
+        public EventBusConnection(IOptions<EventBusOptions> options)
         {
             var factory = new ConnectionFactory
             {

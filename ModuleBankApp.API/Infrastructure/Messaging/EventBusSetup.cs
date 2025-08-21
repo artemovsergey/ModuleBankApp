@@ -4,7 +4,7 @@ namespace ModuleBankApp.API.Infrastructure.Messaging;
 
 public static class EventBusSetup
 {
-    public static async Task SetupQueuesAsync(IEventBusConnectionService connection,
+    public static async Task SetupQueuesAsync(IEventBusConnection connection,
                                               string exchangeName,
                                               CancellationToken ct = default)
     {

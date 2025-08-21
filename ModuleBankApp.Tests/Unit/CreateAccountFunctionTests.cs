@@ -73,7 +73,7 @@ public class CreateAccountFunctionTests
         // Arrange
         var mockRepo = new Mock<IAccountRepository>();
         var mockLogger = new Mock<ILogger<CreateAccountHandler>>();
-        var mockBus = new Mock<IEventBus>();
+        var mockBus = new Mock<IEventBusService>();
         var mockClock = new Mock<TimeProvider>();
         var mockContext = new Mock<ModuleBankAppContext>();
         var mockAccessor = new Mock<IHttpContextAccessor>(); 
@@ -93,7 +93,7 @@ public class CreateAccountFunctionTests
         mockRepo.Setup(r => r.CreateAccount(It.IsAny<Account>()))
             .ReturnsAsync(account);
 
-        var handler = new CreateAccountHandler(mockRepo.Object, mockLogger.Object, mockContext.Object, mockAccessor.Object);
+        var handler = new CreateAccountHandler(mockRepo.Object, mockLogger.Object, mockContext.Object);
         
         var request = new CreateAccountRequest(_validAccountDto, account.OwnerId);
 

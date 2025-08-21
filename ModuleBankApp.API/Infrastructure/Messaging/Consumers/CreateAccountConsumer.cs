@@ -1,11 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using ModuleBankApp.API.Infrastructure.Data;
-using ModuleBankApp.API.Infrastructure.Messaging.Inbox;
-using ModuleBankApp.API.Infrastructure.Messaging.Options;
-using ModuleBankApp.API.Infrastructure.Messaging.Outbox;
+using ModuleBankApp.API.Infrastructure.Messaging.Models;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -13,13 +10,11 @@ namespace ModuleBankApp.API.Infrastructure.Messaging.Consumers;
 
 public class CreateAccountConsumer(
     IServiceScopeFactory scopeFactory,
-    IEventBusConnectionService connection,
-    ILogger<CreateAccountConsumer> log,
-    IOptions<EventBusOptions> options)
+    IEventBusConnection connection,
+    ILogger<CreateAccountConsumer> log)
     : BackgroundService
 {
-    private readonly EventBusOptions _options = options.Value;
-
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var channel = await connection.CreateChannelAsync();
@@ -28,16 +23,13 @@ public class CreateAccountConsumer(
         consumer.ReceivedAsync += async (_, ea) =>
         {
             var message = Encoding.UTF8.GetString(ea.Body.ToArray());
-            OutboxMessage? @event = null;
+            EventEnvelope<OutboxMessage>? @envelope = null;
 
             try
             {
-                @event = JsonSerializer.Deserialize<OutboxMessage>(message);
-                log.LogInformation("Event.Id = {Id}", @event?.Id);
-                log.LogInformation("Event.Payload = {Payload}", @event?.Payload);
-                log.LogInformation("Event.Type = {Type}", @event?.Type);
+                @envelope = JsonSerializer.Deserialize<EventEnvelope<OutboxMessage>>(message);
                 
-                if (@event is null)
+                if (envelope is null)
                 {
                     log.LogWarning("Не удалось десериализовать сообщение: {Message}", message);
                     await channel.BasicAckAsync(ea.DeliveryTag, false);
@@ -48,51 +40,48 @@ public class CreateAccountConsumer(
                 var db = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
                 
                 // Проверка идемпотентности
-                var alreadyProcessed = await db.Inbox.AnyAsync(i => i.Id == @event.Id, stoppingToken);
+                var alreadyProcessed = await db.Inbox.AnyAsync(m => m.Id == @envelope.Payload.Id, stoppingToken);
                 
                 if (alreadyProcessed)
                 {
-                    log.LogInformation("Сообщение {EventId} уже обработано", @event.Id);
+                    log.LogInformation("Сообщение {EventId} уже обработано", @envelope.Payload.Id);
                 }
                 else
                 {
-                    // сохраняем в Inbox
                     db.Inbox.Add(new InboxMessage
                     {
-                        Id = @event.Id,
-                        
+                        Id = @envelope.Payload.Id,
+                        Type = @envelope.Payload.Type,
                         Payload = message,
                         ReceivedAtUtc = DateTimeOffset.UtcNow,
-                        Processed = true // сразу пометим обработанным
+                        Processed = true
                     });
 
                     // TODO: бизнес-логика обработки
-                    log.LogInformation("Обрабатываю новое сообщение {EventId}",@event.Id);
+                    log.LogInformation("\n Обрабатываю новое сообщение {EventId} \n",@envelope.Payload.Id);
 
                     await db.SaveChangesAsync(stoppingToken);
                 }
                 
-                await channel.BasicAckAsync(ea.DeliveryTag, false);
+                await channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
             }
             catch (Exception ex)
             {
-                log.LogError(ex, "Ошибка при обработке сообщения {EventId}", @event?.Id);
+                log.LogError(ex, "\n Ошибка при обработке сообщения {EventId} \n", @envelope!.Payload.Id);
 
                 // Сообщение вернётся в очередь
-                await channel.BasicNackAsync(ea.DeliveryTag, false, requeue: true);
+                await channel.BasicNackAsync(ea.DeliveryTag, false, requeue: true, cancellationToken: stoppingToken);
             }
         };
         
-        await channel.BasicQosAsync(0, 10, false);
+        await channel.BasicQosAsync(0, 10, false, stoppingToken);
         await channel.BasicConsumeAsync(
             queue: "account.opened",
             autoAck: false,
             consumer: consumer,
             cancellationToken: stoppingToken);
 
-        
-        
-        log.LogInformation("Inbox consumer запущен для очереди account.opened");
+        log.LogInformation("\n Inbox consumer запущен для очереди account.opened \n");
     }
 }
 

@@ -142,7 +142,7 @@ namespace ModuleBankApp.API.Migrations
 
                     b.Property<string>("Payload")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("jsonb");
 
                     b.Property<bool>("Processed")
                         .HasColumnType("boolean");
@@ -151,12 +151,12 @@ namespace ModuleBankApp.API.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Inbox");
+                    b.ToTable("inbox_messages", (string)null);
                 });
 
             modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Outbox.OutboxMessage", b =>

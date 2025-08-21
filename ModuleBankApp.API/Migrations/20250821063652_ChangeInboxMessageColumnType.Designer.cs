@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModuleBankApp.API.Migrations
 {
     [DbContext(typeof(ModuleBankAppContext))]
-    [Migration("20250818165801_Init")]
-    partial class Init
+    [Migration("20250821063652_ChangeInboxMessageColumnType")]
+    partial class ChangeInboxMessageColumnType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -135,6 +135,31 @@ namespace ModuleBankApp.API.Migrations
                         .HasDatabaseName("IX_Transactions_Type_Currency");
 
                     b.ToTable("Transactions", "public");
+                });
+
+            modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Inbox.InboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<bool>("Processed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("ReceivedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("inbox_messages", (string)null);
                 });
 
             modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Outbox.OutboxMessage", b =>

@@ -39,6 +39,21 @@ namespace ModuleBankApp.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "inbox_messages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Type = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    Payload = table.Column<string>(type: "jsonb", nullable: false),
+                    ReceivedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Processed = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_inbox_messages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "outbox_messages",
                 columns: table => new
                 {
@@ -127,6 +142,9 @@ namespace ModuleBankApp.API.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "inbox_messages");
+
             migrationBuilder.DropTable(
                 name: "outbox_messages");
 

@@ -11,9 +11,9 @@ public class ModuleBankAppContext : DbContext
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<OutboxMessage> Outbox => Set<OutboxMessage>();
-    
+
     public DbSet<InboxMessage> Inbox => Set<InboxMessage>();
-    
+
     public ModuleBankAppContext(DbContextOptions<ModuleBankAppContext> opt)
         : base(opt)
     {
@@ -35,7 +35,7 @@ public class ModuleBankAppContext : DbContext
         modelBuilder.ApplyConfiguration(new TransactionConfiguration());
 
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<OutboxMessage>(eb =>
         {
             eb.ToTable("outbox_messages");
@@ -46,7 +46,14 @@ public class ModuleBankAppContext : DbContext
             eb.Property(x => x.PublishAttempts).HasDefaultValue(0);
             eb.HasIndex(x => new { x.Status, x.CreatedAtUtc });
         });
+
+        modelBuilder.Entity<InboxMessage>(eb =>
+        {
+            eb.ToTable("inbox_messages");
+            eb.HasKey(x => x.Id);
+            eb.Property(x => x.Type).HasMaxLength(512);
+            eb.Property(x => x.Payload).IsRequired().HasColumnType("jsonb");
+            eb.Property(x => x.ReceivedAtUtc);
+        });
     }
 }
-
-// +

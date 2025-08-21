@@ -1,6 +1,9 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using ModuleBankApp.API.Infrastructure.Data;
+using ModuleBankApp.API.Infrastructure.Messaging.Inbox;
 using ModuleBankApp.API.Infrastructure.Messaging.Options;
 using ModuleBankApp.API.Infrastructure.Messaging.Outbox;
 using RabbitMQ.Client;
@@ -25,12 +28,68 @@ public class CreateAccountConsumer(
         consumer.ReceivedAsync += async (_, ea) =>
         {
             var message = Encoding.UTF8.GetString(ea.Body.ToArray());
-            var evt = JsonSerializer.Deserialize<OutboxMessage>(message);
-            await channel.BasicNackAsync(ea.DeliveryTag, false, requeue: true);
+            OutboxMessage? @event = null;
+
+            try
+            {
+                @event = JsonSerializer.Deserialize<OutboxMessage>(message);
+                log.LogInformation("@event.Id = ",@event.Id);
+                log.LogInformation("@event.Payload = ",@event.Payload);
+                log.LogInformation("@event.Type = ",@event.Type);
+                
+                if (@event is null)
+                {
+                    log.LogWarning("Не удалось десериализовать сообщение: {Message}", message);
+                    await channel.BasicAckAsync(ea.DeliveryTag, false);
+                    return;
+                }
+                
+                using var scope = scopeFactory.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
+                
+                // Проверка идемпотентности
+                var alreadyProcessed = await db.Inbox.AnyAsync(i => i.Id == @event.Id, stoppingToken);
+                
+                if (alreadyProcessed)
+                {
+                    log.LogInformation("Сообщение {EventId} уже обработано", @event.Id);
+                }
+                else
+                {
+                    // сохраняем в Inbox
+                    db.Inbox.Add(new InboxMessage
+                    {
+                        Id = @event.Id,
+                        
+                        Payload = message,
+                        ReceivedAtUtc = DateTimeOffset.UtcNow,
+                        Processed = true // сразу пометим обработанным
+                    });
+
+                    // TODO: бизнес-логика обработки
+                    log.LogInformation("Обрабатываю новое сообщение {EventId}",@event.Id);
+
+                    await db.SaveChangesAsync(stoppingToken);
+                }
+                
+                await channel.BasicAckAsync(ea.DeliveryTag, false);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Ошибка при обработке сообщения {EventId}", @event?.Id);
+
+                // Сообщение вернётся в очередь
+                await channel.BasicNackAsync(ea.DeliveryTag, false, requeue: true);
+            }
         };
 
-        await channel.BasicConsumeAsync("account.opened", false, consumer);
+        await channel.BasicConsumeAsync(
+            queue: "account.opened",
+            autoAck: false,
+            consumer: consumer,
+            cancellationToken: stoppingToken);
         
+        log.LogInformation("Inbox consumer запущен для очереди account.opened");
     }
 }
 

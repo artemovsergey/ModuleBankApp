@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModuleBankApp.API.Migrations
 {
     [DbContext(typeof(ModuleBankAppContext))]
-    [Migration("20250818191644_Inbox")]
-    partial class Inbox
+    [Migration("20250821062727_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -145,7 +145,7 @@ namespace ModuleBankApp.API.Migrations
 
                     b.Property<string>("Payload")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("jsonb");
 
                     b.Property<bool>("Processed")
                         .HasColumnType("boolean");
@@ -155,11 +155,12 @@ namespace ModuleBankApp.API.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Inbox");
+                    b.ToTable("inbox_messages", (string)null);
                 });
 
             modelBuilder.Entity("ModuleBankApp.API.Infrastructure.Messaging.Outbox.OutboxMessage", b =>

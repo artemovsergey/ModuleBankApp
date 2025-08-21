@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Infrastructure.Data.Configurations;
 using ModuleBankApp.API.Infrastructure.Messaging.Inbox;
+using ModuleBankApp.API.Infrastructure.Messaging.Models;
 using ModuleBankApp.API.Infrastructure.Messaging.Outbox;
 
 namespace ModuleBankApp.API.Infrastructure.Data;
@@ -11,8 +12,9 @@ public class ModuleBankAppContext : DbContext
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<OutboxMessage> Outbox => Set<OutboxMessage>();
-
     public DbSet<InboxMessage> Inbox => Set<InboxMessage>();
+    
+    public DbSet<AuditMessage> Audit => Set<AuditMessage>();
 
     public ModuleBankAppContext(DbContextOptions<ModuleBankAppContext> opt)
         : base(opt)
@@ -52,6 +54,14 @@ public class ModuleBankAppContext : DbContext
             eb.ToTable("inbox_messages");
             eb.HasKey(x => x.Id);
             eb.Property(x => x.Type).HasMaxLength(512);
+            eb.Property(x => x.Payload).IsRequired().HasColumnType("jsonb");
+            eb.Property(x => x.ReceivedAtUtc);
+        });
+        
+        modelBuilder.Entity<InboxMessage>(eb =>
+        {
+            eb.ToTable("audit_messages");
+            eb.HasKey(x => x.Id);
             eb.Property(x => x.Payload).IsRequired().HasColumnType("jsonb");
             eb.Property(x => x.ReceivedAtUtc);
         });

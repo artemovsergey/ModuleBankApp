@@ -10,7 +10,6 @@ using ModuleBankApp.API.Infrastructure.Data;
 using ModuleBankApp.API.Infrastructure.Data.Interfaces;
 using ModuleBankApp.API.Infrastructure.Data.Repositories;
 using ModuleBankApp.API.Infrastructure.Messaging;
-using ModuleBankApp.API.Metrics;
 using ModuleBankApp.API.Services;
 using ModuleBankApp.API.Middlewares;
 
@@ -22,8 +21,7 @@ builder.Services.AddSwaggerServices();
 builder.Services.AddSerializeServices();
 builder.Services.AddAuthServices(config);
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly())
-        .AddOpenBehavior(typeof(HandlePerformancemetricBehavior<,>)));
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddTransient(typeof(IRequestPreProcessor<>), typeof(LoggingBehavior<>));
 builder.Services.AddFluentValidationServices();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -32,7 +30,6 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddDbContext<ModuleBankAppContext>(o =>
     o.UseNpgsql(config.GetConnectionString("PostgreSQL")));
-builder.Services.AddSingleton<HandlePerformancemetric>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient();
 builder.Services.AddAuthorizationBuilder()

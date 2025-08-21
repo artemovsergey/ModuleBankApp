@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ModuleBankApp.API.Infrastructure.Data;
 using ModuleBankApp.API.Infrastructure.Messaging.Inbox;
+using ModuleBankApp.API.Infrastructure.Messaging.Models;
 using ModuleBankApp.API.Infrastructure.Messaging.Options;
 using ModuleBankApp.API.Infrastructure.Messaging.Outbox;
 using RabbitMQ.Client;
@@ -11,10 +12,10 @@ using RabbitMQ.Client.Events;
 
 namespace ModuleBankApp.API.Infrastructure.Messaging.Consumers;
 
-public class CreateAccountConsumer(
+public class AuditConsumer(
     IServiceScopeFactory scopeFactory,
     IEventBusConnectionService connection,
-    ILogger<CreateAccountConsumer> log,
+    ILogger<AuditConsumer> log,
     IOptions<EventBusOptions> options)
     : BackgroundService
 {
@@ -35,7 +36,6 @@ public class CreateAccountConsumer(
                 @event = JsonSerializer.Deserialize<OutboxMessage>(message);
                 log.LogInformation("Event.Id = {Id}", @event?.Id);
                 log.LogInformation("Event.Payload = {Payload}", @event?.Payload);
-                log.LogInformation("Event.Type = {Type}", @event?.Type);
                 
                 if (@event is null)
                 {
@@ -48,7 +48,7 @@ public class CreateAccountConsumer(
                 var db = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
                 
                 // Проверка идемпотентности
-                var alreadyProcessed = await db.Inbox.AnyAsync(i => i.Id == @event.Id, stoppingToken);
+                var alreadyProcessed = await db.Audit.AnyAsync(i => i.Id == @event.Id, stoppingToken);
                 
                 if (alreadyProcessed)
                 {
@@ -57,14 +57,7 @@ public class CreateAccountConsumer(
                 else
                 {
                     // сохраняем в Inbox
-                    db.Inbox.Add(new InboxMessage
-                    {
-                        Id = @event.Id,
-                        
-                        Payload = message,
-                        ReceivedAtUtc = DateTimeOffset.UtcNow,
-                        Processed = true // сразу пометим обработанным
-                    });
+                    db.Audit.Add(new AuditMessage( @event.Id, message, DateTimeOffset.UtcNow));
 
                     // TODO: бизнес-логика обработки
                     log.LogInformation("Обрабатываю новое сообщение {EventId}",@event.Id);
@@ -85,7 +78,7 @@ public class CreateAccountConsumer(
         
         await channel.BasicQosAsync(0, 10, false);
         await channel.BasicConsumeAsync(
-            queue: "account.opened",
+            queue: "account.audit",
             autoAck: false,
             consumer: consumer,
             cancellationToken: stoppingToken);

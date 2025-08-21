@@ -18,6 +18,8 @@ public static class EventBusServices
         services.AddHostedService<AntifraudConsumer>();
         services.AddHostedService<CreateAccountProducer>();
         services.AddHostedService<CreateAccountConsumer>();
+        services.AddHostedService<AuditConsumer>();
+        
         return services;
     }
 }

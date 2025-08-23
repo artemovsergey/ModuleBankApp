@@ -7,8 +7,8 @@ using Polly;
 
 namespace ModuleBankApp.API.Infrastructure.Messaging.Producers;
 
-public class CreateAccountProducer(IEventBusService eventBus,
-                                   ILogger<CreateAccountProducer> logger,
+public class MoneyDebitedProducer(IEventBusService eventBusService,
+                                   ILogger<MoneyDebitedProducer> logger,
                                    IServiceScopeFactory scopedFactory) : BackgroundService
 {
     private static readonly Random Random = new Random();
@@ -40,23 +40,24 @@ public class CreateAccountProducer(IEventBusService eventBus,
                                 var jitter = Random.NextDouble();       // 0..1 сек случайно
                                 return TimeSpan.FromSeconds(exponential + jitter);
                             },
-                            onRetry: (ex, ts, attempt, _) =>
+                            onRetry: (ex, ts, attempt, ctx) =>
                             {
                                 logger.LogWarning(ex,
-                                    "\n Ошибка при публикации события {@LogContext} \n",
+                                    "Ошибка при публикации события {@LogContext}",
                                     new
                                     {
                                         EventId = @event.Id,
                                         Type = @event.Type,
                                         Retry = attempt,
                                         Delay = ts
+                               
                                     });
                             })
-                        .ExecuteAsync(() => eventBus.PublishAsync(@event, "account.opened", stoppingToken));
+                        .ExecuteAsync(() => eventBusService.PublishAsync(@event, routekey: "money.debited", stoppingToken));
 
                     stopwatch.Stop();
 
-                    logger.LogInformation("\n Событие опубликовано {@LogContext} \n",
+                    logger.LogInformation("Событие опубликовано} {@LogContext}",
                         new
                         {
                             EventId = @event.Id,
@@ -66,7 +67,7 @@ public class CreateAccountProducer(IEventBusService eventBus,
 
                     @event.Status = OutboxStatus.Published;
                     db.Entry(@event).State = EntityState.Modified;
-                    await db.SaveChangesAsync(stoppingToken); 
+                    await db.SaveChangesAsync(stoppingToken);
                     // TODO Update with batch 
                 }
                 catch (Exception ex)
@@ -77,7 +78,7 @@ public class CreateAccountProducer(IEventBusService eventBus,
                     db.Entry(@event).State = EntityState.Modified;
                     await db.SaveChangesAsync(stoppingToken);
 
-                    logger.LogError(ex, "\n Не удалось опубликовать событие {@LogContext} \n",
+                    logger.LogError(ex, "Не удалось опубликовать событие {@LogContext}",
                         new
                         {
                             EventId = @event.Id,

@@ -76,7 +76,7 @@ public class CreateAccountConsumer(
         
         await channel.BasicQosAsync(0, 10, false, stoppingToken);
         await channel.BasicConsumeAsync(
-            queue: "account.opened",
+            queue: "account.crm",
             autoAck: false,
             consumer: consumer,
             cancellationToken: stoppingToken);

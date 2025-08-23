@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Infrastructure.Data.Interfaces;
 using ModuleBankApp.API.Infrastructure.Messaging.Options;
 using RabbitMQ.Client;
@@ -19,28 +20,32 @@ public class AntifraudConsumer(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var channel = await connection.CreateChannelAsync();
-        await channel.ExchangeDeclareAsync(_options.ExchangeName, ExchangeType.Topic, durable: true);
-        await channel.QueueDeclareAsync("account.antifraud", durable: true, exclusive: false, autoDelete: false);
-        await channel.QueueBindAsync("account.antifraud", _options.ExchangeName, "");
-
+        
         var consumer = new AsyncEventingBasicConsumer(channel);
         consumer.ReceivedAsync += async (_, ea) =>
         {
             var message = Encoding.UTF8.GetString(ea.Body.ToArray());
-            var evt = JsonSerializer.Deserialize<AntifraudEvent>(message);
-
+     
             using var scope = scopeFactory.CreateScope();
             var repo = scope.ServiceProvider.GetRequiredService<IAccountRepository>();
+            
+            switch (ea.RoutingKey)
+            {
+                case "client.blocked":
+                    var blocked = JsonSerializer.Deserialize<ClientBlocked>(message);
+                    await repo.FreezeAccount(blocked!.ClientId, true);
+                    break;
 
-            if (evt?.Action == "client.blocked")
-                await repo.FreezeAccount(evt.ClientId, true);
-            else if (evt?.Action == "client.unblocked")
-                await repo.FreezeAccount(evt.ClientId, false);
-
-            await channel.BasicAckAsync(ea.DeliveryTag, false);
+                case "client.unblocked":
+                    var unblocked = JsonSerializer.Deserialize<ClientUnblocked>(message);
+                    await repo.FreezeAccount(unblocked!.ClientId, false);
+                    break;
+            }
+            
+            await channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
         };
 
-        await channel.BasicConsumeAsync("account.antifraud", false, consumer);
+        await channel.BasicConsumeAsync("account.antifraud", false, consumer, cancellationToken: stoppingToken);
     }
 }
 

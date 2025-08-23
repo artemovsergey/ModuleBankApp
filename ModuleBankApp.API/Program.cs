@@ -56,7 +56,7 @@ builder.Services.AddHealthCheckServices(config);
 var app = builder.Build();
 
 var connection = app.Services.GetRequiredService<IEventBusConnection>();
-await EventBusSetup.SetupQueuesAsync(connection, "account.events");
+await EventBusSetup.SetupQueuesAsync(connection);
 
 // app.UseMiddleware<CorrelationIdMiddleware>();
 if (app.Environment.IsProduction())

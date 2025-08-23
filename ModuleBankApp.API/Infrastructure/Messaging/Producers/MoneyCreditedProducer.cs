@@ -53,7 +53,7 @@ public class MoneyCreditedProducer(IEventBusService eventBusService,
                                
                                     });
                             })
-                        .ExecuteAsync(() => eventBusService.PublishAsync(@event, routekey: "account.credited", stoppingToken));
+                        .ExecuteAsync(() => eventBusService.PublishAsync(@event, routekey: "money.credited", stoppingToken));
 
                     stopwatch.Stop();
 

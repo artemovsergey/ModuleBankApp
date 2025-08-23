@@ -4,15 +4,16 @@ namespace ModuleBankApp.API.Infrastructure.Messaging;
 
 public static class EventBusSetup
 {
+    private const String ExchangeName = "account.events";
     public static async Task SetupQueuesAsync(IEventBusConnection connection,
-                                              string exchangeName,
                                               CancellationToken ct = default)
     {
         await using var channel = await connection.CreateChannelAsync();
-    
+      
+            
         // 1. Создаём Topic Exchange
         await channel.ExchangeDeclareAsync(
-            exchange: exchangeName,
+            exchange: ExchangeName,
             type: ExchangeType.Topic,
             durable: true,
             cancellationToken: ct);
@@ -27,7 +28,7 @@ public static class EventBusSetup
     
         await channel.QueueBindAsync(
             queue: "account.crm",
-            exchange: exchangeName,
+            exchange: ExchangeName,
             routingKey: "account.*",
             cancellationToken: ct);
     
@@ -41,7 +42,7 @@ public static class EventBusSetup
     
         await channel.QueueBindAsync(
             queue: "account.notifications",
-            exchange: exchangeName,
+            exchange: ExchangeName,
             routingKey: "money.*",
             cancellationToken: ct);
     
@@ -55,7 +56,7 @@ public static class EventBusSetup
     
         await channel.QueueBindAsync(
             queue: "account.antifraud",
-            exchange: exchangeName,
+            exchange: ExchangeName,
             routingKey: "client.*",
             cancellationToken: ct);
     
@@ -69,22 +70,8 @@ public static class EventBusSetup
     
         await channel.QueueBindAsync(
             queue: "account.audit",
-            exchange: exchangeName,
+            exchange: ExchangeName,
             routingKey: "#",
-            cancellationToken: ct);
-        
-        // 6. Очередь account.opened (ловит всё: #)
-        await channel.QueueDeclareAsync(
-            queue: "account.opened",
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            cancellationToken: ct);
-    
-        await channel.QueueBindAsync(
-            queue: "account.opened",
-            exchange: exchangeName,
-            routingKey: "opened",
             cancellationToken: ct);
         
     }

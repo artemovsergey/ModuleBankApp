@@ -19,12 +19,25 @@ public static class HangfireMiddleware
         {
             var result = await mediator.Send(new AccrueInterestRequest());
             return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
-        });
+        })
+        .WithTags("Hangfire")
+        .WithName("TestAccrueInterest")
+        .WithSummary("Проверка метода для вызова хранимой процедуры начисления процентов")
+        .WithDescription("Возвращает результат процедуры")
+        .Produces(StatusCodes.Status401Unauthorized)
+        .RequireAuthorization();
+        
         app.MapPost("/test-cron-job", () =>
         {
             RecurringJob.TriggerJob("accrue-interest-job");
             return Results.Ok("Cron job triggered");
-        });
+        })
+        .WithTags("Hangfire")
+        .WithName("TestAccrueInterestCronJob")
+        .WithSummary("Проверка сron jon начисления процентов")
+        .WithDescription("Возвращает результат задачи")
+        .Produces(StatusCodes.Status401Unauthorized)
+        .RequireAuthorization();;
         
         RecurringJob.AddOrUpdate<InterestJobService>(
             "accrue-interest-job",

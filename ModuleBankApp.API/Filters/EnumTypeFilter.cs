@@ -28,5 +28,3 @@ public class EnumTypesSchemaFilter : ISchemaFilter
         }
     }
 }
-
-// +

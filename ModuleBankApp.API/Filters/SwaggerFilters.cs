@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Xml.Linq;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using ModuleBankApp.API.Generic;
@@ -5,7 +7,35 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ModuleBankApp.API.Filters;
 
-// ReSharper disable once ClassNeverInstantiated.Global
+public class EnumDocumentFilter : IDocumentFilter
+{
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml");
+        if (!File.Exists(xmlPath)) return;
+        var xmlDoc = XDocument.Load(xmlPath);
+
+        foreach (var type in Assembly.GetExecutingAssembly().GetTypes().Where(t => t.IsEnum))
+        {
+            if (!context.SchemaRepository.Schemas.TryGetValue(type.Name, out var schema))
+                continue;
+
+            // Подставляем summary enum из XML
+            var fullName = type.FullName!.Replace("+", ".");
+            var member = xmlDoc.Descendants("member")
+                .FirstOrDefault(m => m.Attribute("name")?.Value == $"T:{fullName}");
+            schema.Description = member?.Element("summary")?.Value.Trim();
+
+            // Переключаем тип на string и ставим enum имена
+            schema.Type = "string";
+            schema.Format = null;
+            schema.Enum = type.GetEnumNames()
+                .Select(n => (IOpenApiAny)new OpenApiString(n))
+                .ToList<IOpenApiAny>();
+        }
+    }
+}
+
 public class ErrorResponseSchemaFilter : ISchemaFilter
 {
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
@@ -21,7 +51,6 @@ public class ErrorResponseSchemaFilter : ISchemaFilter
         }
     }
 }
-
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public class ErrorResponseOperationFilter : IOperationFilter
@@ -53,4 +82,10 @@ public class ErrorResponseOperationFilter : IOperationFilter
     }
 }
 
-// +
+
+
+
+
+
+
+

@@ -13,6 +13,7 @@ public static class EditAccountEndpoint
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapPut("/account", HandleEditAccount)
+            .WithTags("Аккаунты")
             .WithName("UpdateAccount")
             .WithSummary("Обновление счета")
             .WithDescription("Возвращает объект обновленного счета Account")

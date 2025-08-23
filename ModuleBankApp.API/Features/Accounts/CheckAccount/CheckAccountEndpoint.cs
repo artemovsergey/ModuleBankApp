@@ -13,6 +13,7 @@ public static class CheckAccountEndpoint
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapGet("/account/{accountId:Guid}", HandleEndpoint)
+            .WithTags("Аккаунты")
             .WithName("GetAccount")
             .WithSummary("Поиск счета")
             .WithDescription("Возвращает объект счета Account")

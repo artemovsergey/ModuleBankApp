@@ -12,7 +12,7 @@ public static class CreateAccountEndpoint
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapPost("/account", HandleEndpoint)
-            .WithTags("Account")
+            .WithTags("Аккаунты")
             .WithName("CreateAccount")
             .WithSummary("Создание нового счета")
             .WithDescription("Возвращает объект счета Account")

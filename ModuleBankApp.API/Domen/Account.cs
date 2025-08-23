@@ -13,7 +13,6 @@ public sealed class Account
     /// <summary>
     /// Тип счета (перечисление).
     /// </summary>
-    // ReSharper disable once PropertyCanBeMadeInitOnly.Global
     public AccountType Type { get; set; }
     
     /// <summary>
@@ -75,10 +74,25 @@ public sealed class Account
     // public DateTime LastModifiedAt { get; set; }
 }
 
+/// <summary>
+/// Тип банковского счета
+/// </summary>
 public enum AccountType
 {
+    /// <summary>
+    /// Депозит
+    /// </summary>
     Deposit = 0,
+    /// <summary>
+    /// Cheking
+    /// </summary>
     Checking = 1,
+    /// <summary>
+    /// Кредитный счет
+    /// </summary>
     Credit = 2,
+    /// <summary>
+    /// Нет счета
+    /// </summary>
     None = 3
 }

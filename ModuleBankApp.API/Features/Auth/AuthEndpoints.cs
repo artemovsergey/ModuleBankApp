@@ -36,8 +36,10 @@ public static class AuthEndpoints
 
                 var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
                 return Results.Ok(tokenResponse);
-            }).WithName("Login")
-            .WithSummary("Аутентификация")
+            })
+            .WithTags("Аутентификация")
+            .WithName("Login")
+            .WithSummary("Keycloak")
             .WithDescription("Возвращает jwt токен с Guid пользователя")
             .Produces<string>()
             .Produces(StatusCodes.Status401Unauthorized);

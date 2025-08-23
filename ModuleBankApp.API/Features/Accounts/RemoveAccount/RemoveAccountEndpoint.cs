@@ -13,6 +13,7 @@ public static class RemoveAccountEndpoint
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapDelete("/account/{accountId:Guid}", HandleRemoveAccount)
+            .WithTags("Аккаунты")
             .WithName("RemoveAccount")
             .WithSummary("Удаление счета")
             .WithDescription("Возвращает объект счета Account")

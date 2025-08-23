@@ -13,6 +13,7 @@ public static class GetAllAccountsEndpoint
     public static WebApplication MapEndpoint(this WebApplication app)
     {
         app.MapGet("/accounts", HandleGetAllAccounts)
+            .WithTags("Аккаунты")
             .WithName("GetAllAccounts")
             .WithSummary("Получение списка всех счетов")
             .WithDescription("Возвращает список счетов Account")

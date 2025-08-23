@@ -1,9 +1,9 @@
 namespace ModuleBankApp.API.Domen.Events;
-
+// ReSharper disable NotAccessedPositionalProperty.Global
 /// <summary>
 /// Событие пополнения счета 
 /// </summary>
-public class TransferCompleted
+public class TransferCompleted : IEvent
 {
     /// <summary>
     /// Идентификатор события

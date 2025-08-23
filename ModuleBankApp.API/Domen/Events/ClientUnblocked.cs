@@ -1,5 +1,5 @@
 namespace ModuleBankApp.API.Domen.Events;
-
+// ReSharper disable NotAccessedPositionalProperty.Global
 /// <summary>
 /// Разблокирование всех счетов клиента
 /// </summary>
@@ -10,4 +10,4 @@ public record ClientUnblocked(
     Guid EventId,
     DateTime OccurredAt,
     Guid ClientId
-);
+): IEvent;

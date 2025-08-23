@@ -1,9 +1,12 @@
 using System.Reflection;
 using MediatR;
 using MediatR.Pipeline;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ModuleBankApp.API.Behaviors;
 using ModuleBankApp.API.Data.Interfaces;
+using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Extensions;
 using ModuleBankApp.API.Features.Auth;
 using ModuleBankApp.API.Infrastructure.Data;
@@ -76,6 +79,8 @@ app.UseEndpointsRegister();
 app.UseSwaggerMiddleware();
 app.UseHealthMiddleware();
 app.UseHangfireMiddleware();
+app.UseEventEndpointMiddleware();
+
 app.Run();
 
 // ReSharper disable once ClassNeverInstantiated.Global

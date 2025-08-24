@@ -9,6 +9,8 @@ public interface IAccountRepository
     Task<List<Account>> GetAllAccounts();
     Task<Account> GetAccountById(Guid id);
     Task<Account> UpdateAccount(Account acc, Guid accountId);
-    Task<Account> FreezeAccount(Guid clientId, bool isFrozen);
+    Task<Boolean> FreezeAccount(Guid clientId, bool isFrozen);
+    
+    Task<Boolean> IsFrozen(Guid? accountId);
 }
 

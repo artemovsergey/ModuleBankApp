@@ -88,7 +88,7 @@ Cистема опубликовала событие `MoneyCredited` для с�
       идемпотентность (`Inbox`):
       таблица `inbox_consumed` (message_id UUID PK, processed_at, handler), проверять перед обработкой.
 
-4. Описать и реализовать топологию маршрутизации:    
+4. (выполнено) Описать и реализовать топологию маршрутизации:    
    - `account.events/account.opened` → `routing key account.opened`;    
    - `money.credited/debited/transfer.completed` → `money.*`;
    - `antifraud.client.blocked/unblocked` → `client.*`.

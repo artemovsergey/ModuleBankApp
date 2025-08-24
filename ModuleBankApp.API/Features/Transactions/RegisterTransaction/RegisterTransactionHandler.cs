@@ -21,6 +21,11 @@ public class RegisterTransactionHandler(
 {
     public async Task<MbResult<TransactionDto>> Handle(RegisterTransactionRequest request, CancellationToken ct)
     {
+        if (await repoAccount.IsFrozen(request.TransactionDto.AccountId))
+        {
+            return MbResult<TransactionDto>.Failure("Аккаунт заблокирован");
+        }
+        
         var transactionEntity = request.TransactionDto.ToEntity();
 
         IEvent @event;

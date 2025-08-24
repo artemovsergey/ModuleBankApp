@@ -3,6 +3,7 @@ using Hangfire.Storage;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ModuleBankApp.API.Data.Interfaces;
+using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Dtos;
 using ModuleBankApp.API.Generic;
@@ -23,6 +24,12 @@ public class TransferBetweenAccountHandler(
 {
     public async Task<MbResult<TransactionDto>> Handle(TransferBetweenAccountRequest request, CancellationToken ct)
     {
+        if (await repoAccount.IsFrozen(request.TransactionDto.AccountId) ||
+            await repoAccount.IsFrozen(request.TransactionDto.CounterPartyAccountId))
+        {
+            return MbResult<TransactionDto>.Failure("Аккаунт заблокирован");
+        }
+
         await using var transaction =
             await dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
 
@@ -53,11 +60,11 @@ public class TransferBetweenAccountHandler(
             var accountSender = await repoAccount.GetAccountById(t.AccountId);
             accountSender.Balance -= t.Amount;
             //db.Entry(accountSender).State = EntityState.Modified;
-            
+
             var accountReceiver = await repoAccount.GetAccountById((Guid)t.CounterPartyAccountId!);
             accountReceiver.Balance += t.Amount;
             //db.Entry(accountReceiver).State = EntityState.Modified;
-            
+
             // Проверка итоговых балансов
             if (accountSender.Balance < 0 || accountReceiver.Balance < 0)
             {
@@ -66,7 +73,7 @@ public class TransferBetweenAccountHandler(
             }
 
             var result = await repoTransaction.RegisterTransaction(t);
-            
+
             try
             {
                 await dbContext.SaveChangesAsync(ct);

@@ -8,7 +8,7 @@ public static class RegisterTransactionMapper
 {
     // ReSharper disable once UnusedMember.Global
     public static Transaction MapToTransaction(this TransactionDto registerTransactionDto)
-    {
+    {       
         // ReSharper disable once RedundantEmptyObjectCreationArgumentList
         var t = new Transaction()
         {

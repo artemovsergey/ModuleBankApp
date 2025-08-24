@@ -58,7 +58,7 @@ public class MoneyDebitedProducer(IEventBusService eventBusService,
 
                     stopwatch.Stop();
 
-                    logger.LogInformation("Событие опубликовано} {@LogContext}",
+                    logger.LogInformation("Событие опубликовано {@LogContext}",
                         new
                         {
                             EventId = @event.Id,

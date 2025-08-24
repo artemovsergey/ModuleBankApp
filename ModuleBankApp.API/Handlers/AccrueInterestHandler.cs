@@ -1,10 +1,13 @@
+using System.Text.Json;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ModuleBankApp.API.Data;
 using ModuleBankApp.API.Domen;
+using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Features.Accounts;
 using ModuleBankApp.API.Generic;
 using ModuleBankApp.API.Infrastructure.Data;
+using ModuleBankApp.API.Infrastructure.Messaging.Models;
 
 namespace ModuleBankApp.API.Handlers;
 
@@ -32,8 +35,24 @@ public class AccrueInterestForAllHandler(
                     "CALL public.accrue_interest({0})",
                     id
                 );
-            }
+                
+                var @event = new InterestAccrued
+                {
+                    EventId = Guid.NewGuid(),
+                    OccurredAt = DateTime.Now,
+                    AccountId = id
+                };
+                
+                await db.Outbox.AddAsync(new OutboxMessage
+                {
+                    Type = nameof(InterestAccrued),
+                    Payload = JsonSerializer.Serialize(@event),
+                    Status = OutboxStatus.Pending
+                }, ct);
 
+                await db.SaveChangesAsync(ct);
+            }
+            
             await transaction.CommitAsync(ct);
 
             logger.LogInformation("Interest accrued for {Count} accounts", accountIds.Count);

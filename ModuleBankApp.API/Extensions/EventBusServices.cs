@@ -15,8 +15,15 @@ public static class EventBusServices
         services.AddSingleton<IEventBusConnection, EventBusConnection>();
         services.AddSingleton<IEventBusService, EventBusService>();
         
-        services.AddHostedService<AntifraudConsumer>();
         services.AddHostedService<CreateAccountProducer>();
+        services.AddHostedService<InterestAccruedProducer>();
+        services.AddHostedService<MoneyCreditedProducer>();
+        services.AddHostedService<MoneyDebitedProducer>();
+        services.AddHostedService<MoneyDebitedProducer>();
+        services.AddHostedService<TransferCompletedProducer>();
+        
+        
+        services.AddHostedService<AntifraudConsumer>();
         services.AddHostedService<CreateAccountConsumer>();
         services.AddHostedService<AuditConsumer>();
         

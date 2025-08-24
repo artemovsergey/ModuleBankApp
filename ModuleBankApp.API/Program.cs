@@ -58,7 +58,7 @@ var app = builder.Build();
 var connection = app.Services.GetRequiredService<IEventBusConnection>();
 await EventBusSetup.SetupQueuesAsync(connection);
 
-// app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
 if (app.Environment.IsProduction())
 {
     using var scope = app.Services.CreateScope();

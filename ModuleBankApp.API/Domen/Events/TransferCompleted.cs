@@ -8,7 +8,7 @@ public class TransferCompleted : IEvent
     /// <summary>
     /// Идентификатор события
     /// </summary>
-    public Guid EventId { get; set; }
+    public Guid EventId { get; init; }
     
     /// <summary>
     /// Время создания события

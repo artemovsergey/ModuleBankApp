@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MediatR;
 using ModuleBankApp.API.Data.Interfaces;
+using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Dtos;
 using ModuleBankApp.API.Generic;
@@ -22,30 +23,54 @@ public class RegisterTransactionHandler(
     {
         var transactionEntity = request.TransactionDto.ToEntity();
 
-        var @event = new MoneyCredited  
+        IEvent @event;
+        if (request.TransactionDto.Type == TransactionType.Credit)
         {
-            EventId = Guid.NewGuid(),
-            OccurredAt = DateTime.Now,
-            AccountId = transactionEntity.AccountId,
-            Amount = transactionEntity.Amount,
-            Currency = transactionEntity.Currency,
-            OperationId = transactionEntity.Id
-        };
+            @event = new MoneyCredited()  
+            {
+                EventId = Guid.NewGuid(),
+                OccurredAt = DateTime.Now,
+                AccountId = transactionEntity.AccountId,
+                Amount = transactionEntity.Amount,
+                Currency = transactionEntity.Currency,
+                OperationId = transactionEntity.Id
+            };
+        }
+        else
+        {
+            @event = new MoneyDebited()  
+            {
+                EventId = Guid.NewGuid(),
+                OccurredAt = DateTime.Now,
+                AccountId = transactionEntity.AccountId,
+                Amount = transactionEntity.Amount,
+                Currency = transactionEntity.Currency,
+                OperationId = transactionEntity.Id
+            }; 
+        }
         
         await using var tx = await db.Database.BeginTransactionAsync(ct);
         
         await db.Outbox.AddAsync(new OutboxMessage
         {
             Id = @event.EventId,
-            Type = nameof(MoneyCredited),
+            Type = request.TransactionDto.Type == TransactionType.Credit ? nameof(MoneyCredited) : nameof(MoneyDebited),
             Payload = JsonSerializer.Serialize(@event),
             Status = OutboxStatus.Pending
         }, ct);
         
         var account = await repoAccount.GetAccountById(transactionEntity.AccountId);
         
-        account.Balance += transactionEntity.Amount;
-        
+        switch (request.TransactionDto.Type)
+        {
+            case TransactionType.Credit:
+                account.Balance += transactionEntity.Amount;
+                break;
+            case TransactionType.Debit:
+                account.Balance -= transactionEntity.Amount;
+                break;
+        }
+
         var savedTransaction = await repoTransaction.RegisterTransaction(transactionEntity);
         logger.LogWarning("Creating transaction for account {savedTransaction.AccountId}", savedTransaction.AccountId);
         

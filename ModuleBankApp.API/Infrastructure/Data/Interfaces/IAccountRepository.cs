@@ -12,4 +12,3 @@ public interface IAccountRepository
     Task<Account> FreezeAccount(Guid clientId, bool isFrozen);
 }
 
-// +

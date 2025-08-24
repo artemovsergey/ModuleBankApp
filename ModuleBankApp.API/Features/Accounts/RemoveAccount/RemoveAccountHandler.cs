@@ -17,4 +17,3 @@ public class RemoveAccountHandler(IAccountRepository repo, ILogger<RemoveAccount
     }
 }
 
-// +

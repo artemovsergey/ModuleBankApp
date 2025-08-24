@@ -15,4 +15,3 @@ public class CheckAccountValidator : AbstractValidator<CheckAccountRequest>
     }
 }
 
-// +

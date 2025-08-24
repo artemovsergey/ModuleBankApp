@@ -125,4 +125,3 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
     }
 }
 
-// +

@@ -48,9 +48,3 @@ public class AntifraudConsumer(
         await channel.BasicConsumeAsync("account.antifraud", false, consumer, cancellationToken: stoppingToken);
     }
 }
-
-public class AntifraudEvent
-{
-    public Guid ClientId { get; set; }
-    public string Action { get; set; } = string.Empty;
-}

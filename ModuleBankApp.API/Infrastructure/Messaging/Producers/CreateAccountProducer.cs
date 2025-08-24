@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using ModuleBankApp.API.Domen.Events;
 using ModuleBankApp.API.Infrastructure.Data;
 using ModuleBankApp.API.Infrastructure.Data.Interfaces;
 using ModuleBankApp.API.Infrastructure.Messaging.Models;
@@ -21,7 +22,7 @@ public class CreateAccountProducer(IEventBusService eventBus,
             var db = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
             
             var publishEvents = await db.Outbox
-                .Where(e => e.Status == OutboxStatus.Pending)
+                .Where(e => e.Status == OutboxStatus.Pending && e.Type == nameof(AccountOpened))
                 .ToListAsync(cancellationToken: stoppingToken);
 
             foreach (var @event in publishEvents)

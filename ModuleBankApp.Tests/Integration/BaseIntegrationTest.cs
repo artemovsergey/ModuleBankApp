@@ -19,4 +19,3 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestApplica
     }
 }
 
-// +

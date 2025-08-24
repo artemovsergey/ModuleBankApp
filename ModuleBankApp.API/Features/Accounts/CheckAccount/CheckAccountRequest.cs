@@ -6,4 +6,3 @@ namespace ModuleBankApp.API.Features.Accounts.CheckAccount;
 
 public record CheckAccountRequest(Guid AccountId, Guid OwnerId) : IRequest<MbResult<AccountDto>>;
 
-// +

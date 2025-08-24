@@ -13,4 +13,3 @@ public class RemoveAccountValidator : AbstractValidator<RemoveAccountRequest>
     }
 }
 
-// +

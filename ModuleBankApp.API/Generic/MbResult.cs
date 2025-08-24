@@ -17,4 +17,3 @@ public class MbResult<T>
     public static MbResult<T> Failure(string error) => new(default!, false, error);
 }
 
-// +

@@ -6,4 +6,3 @@ namespace ModuleBankApp.API.Features.Accounts.RemoveAccount;
 
 public record RemoveAccountRequest(Guid AccountId) : IRequest<MbResult<Account>>;
 
-// +

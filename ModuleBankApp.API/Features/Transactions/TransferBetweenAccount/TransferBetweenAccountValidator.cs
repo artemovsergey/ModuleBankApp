@@ -28,4 +28,3 @@ public class TransferBetweenAccountValidator : AbstractValidator<TransferBetween
             .WithMessage("Invalid currency code. Please provide a valid ISO 4217 currency code.");
     }
 }
-// +

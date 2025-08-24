@@ -11,4 +11,3 @@ public class LoggingBehavior<TRequest>(ILogger<TRequest> logger) : IRequestPrePr
     }
 }
 
-// +

@@ -23,7 +23,7 @@ public class TransferCompleted : IEvent
     /// <summary>
     /// Идентификатор счета пользователя
     /// </summary>
-    public Guid DestinationAccountId { get; set; }
+    public Guid? DestinationAccountId { get; set; }
     
     /// <summary>
     /// Сумма пополнения счета

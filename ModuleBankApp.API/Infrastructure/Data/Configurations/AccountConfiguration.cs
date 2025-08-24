@@ -118,5 +118,5 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         ];
     }
     
-    // +
+    
 }

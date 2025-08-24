@@ -9,4 +9,3 @@ public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor)
     public string? UserId => httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
-// +

@@ -7,4 +7,5 @@ public class EventBusOptions
     public string Password { get; set; } = "guest";
     public string VirtualHost { get; set; } = "/";
     public string ExchangeName { get; set; } = "account.events";
+    public int Port { get; set; } = 5672;
 }

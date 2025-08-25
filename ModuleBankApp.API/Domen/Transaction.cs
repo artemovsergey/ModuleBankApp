@@ -1,5 +1,3 @@
-
-
 // ReSharper disable PropertyCanBeMadeInitOnly.Global
 namespace ModuleBankApp.API.Domen;
 

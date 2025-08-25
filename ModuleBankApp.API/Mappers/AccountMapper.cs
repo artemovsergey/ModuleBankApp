@@ -1,9 +1,7 @@
 using ModuleBankApp.API.Domen;
 using ModuleBankApp.API.Dtos;
-using ModuleBankApp.API.Features.Transactions;
-using ModuleBankApp.API.Mappers;
 
-namespace ModuleBankApp.API.Features.Accounts;
+namespace ModuleBankApp.API.Mappers;
 
 public static class AccountMapper
 {

@@ -3,13 +3,11 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
-using ModuleBankApp.API.Data;
-using ModuleBankApp.API.Data.Interfaces;
 using ModuleBankApp.API.Domen;
-using ModuleBankApp.API.Features.Accounts;
 using Moq;
 using ModuleBankApp.API.Features.Accounts.CreateAccount;
 using ModuleBankApp.API.Generic;
@@ -73,10 +71,6 @@ public class CreateAccountFunctionTests
         // Arrange
         var mockRepo = new Mock<IAccountRepository>();
         var mockLogger = new Mock<ILogger<CreateAccountHandler>>();
-        var mockBus = new Mock<IEventBusService>();
-        var mockClock = new Mock<TimeProvider>();
-        var mockContext = new Mock<ModuleBankAppContext>();
-        var mockAccessor = new Mock<IHttpContextAccessor>(); 
 
         var account = new Account
         {
@@ -84,17 +78,26 @@ public class CreateAccountFunctionTests
             Type = AccountType.Checking,
             Currency = "USD",
             Balance = 1000m,
-            InterestRate = null,
             CreatedAt = DateTime.UtcNow,
             OwnerId = Guid.NewGuid()
         };
 
-        // Мок репозитория: при вызове CreateAccount возвращаем account
         mockRepo.Setup(r => r.CreateAccount(It.IsAny<Account>()))
             .ReturnsAsync(account);
 
-        var handler = new CreateAccountHandler(mockRepo.Object, mockLogger.Object, mockContext.Object);
-        
+        var options = new DbContextOptionsBuilder<ModuleBankAppContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+
+        var dbContext = new ModuleBankAppContext(options);
+
+        var handler = new CreateAccountHandler(
+            mockRepo.Object,
+            mockLogger.Object,
+            dbContext
+        );
+
         var request = new CreateAccountRequest(_validAccountDto, account.OwnerId);
 
         // Act
@@ -108,7 +111,6 @@ public class CreateAccountFunctionTests
         Assert.Equal("USD", result.Value.Currency);
         Assert.Equal(1000m, result.Value.Balance);
 
-        // Проверяем, что репозиторий вызвался 1 раз
         mockRepo.Verify(r => r.CreateAccount(It.IsAny<Account>()), Times.Once);
     }
 

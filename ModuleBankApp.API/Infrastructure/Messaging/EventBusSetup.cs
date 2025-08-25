@@ -10,7 +10,6 @@ public static class EventBusSetup
     {
         await using var channel = await connection.CreateChannelAsync();
       
-            
         // 1. Создаём Topic Exchange
         await channel.ExchangeDeclareAsync(
             exchange: ExchangeName,

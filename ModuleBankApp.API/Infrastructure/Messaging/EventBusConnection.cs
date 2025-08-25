@@ -17,26 +17,18 @@
             var factory = new ConnectionFactory
             {
                 HostName = options.Value.HostName,
+                Port = options.Value.Port,
                 UserName = options.Value.UserName,
                 Password = options.Value.Password,
                 VirtualHost = options.Value.VirtualHost
             };
-            
             _connection = factory.CreateConnectionAsync().GetAwaiter().GetResult();
         }
 
         public async Task<IChannel> CreateChannelAsync()
         {
-            var factory = new ConnectionFactory
-            {
-                HostName = "rabbitmq",
-                UserName = "guest",
-                Password = "guest",
-                VirtualHost = "/"
-            };
-            
-            var channel = factory.CreateConnectionAsync().GetAwaiter().GetResult().CreateChannelAsync();
-            return await channel;
+            var channel = await _connection.CreateChannelAsync();
+            return channel;
         }
 
         public void Dispose()

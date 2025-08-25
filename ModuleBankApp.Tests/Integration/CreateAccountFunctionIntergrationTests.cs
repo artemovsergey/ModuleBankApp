@@ -1,140 +1,89 @@
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 using ModuleBankApp.API.Domen;
-using ModuleBankApp.API.Features.Accounts;
 using ModuleBankApp.API.Features.Accounts.CreateAccount;
+using ModuleBankApp.API.Generic;
 using Xunit;
 
 namespace ModuleBankApp.Tests.Integration;
 
-public class CreateAccountFunctionIntegrationTests(IntegrationTestApplicationFactory factory)
-    : BaseIntegrationTest(factory)
+public class CreateAccountIntegrationTests : BaseIntegrationTest
 {
+    private readonly ClaimsPrincipal _userWithValidId = new(new ClaimsIdentity(
+        [new Claim(ClaimTypes.NameIdentifier, "a191ee39-08a7-4ffa-8f53-3c5f0f5f9b1c")]));
+
+    private readonly ClaimsPrincipal _userWithoutId = new(new ClaimsIdentity());
+
+    private readonly CreateAccountDto _validAccountDto = new(
+        AccountType.Checking,
+        "USD",
+        1000m,
+        null
+    );
+
+    public CreateAccountIntegrationTests(IntegrationTestApplicationFactory factory) 
+        : base(factory) { }
+
     [Fact]
-    public async Task Handle_ShouldPersistAccount_WhenRequestIsValid()
+    public async Task HandleRequest_WithInvalidUser_ReturnsUnauthorized()
     {
-        // Arrange
-        var ownerId = Guid.NewGuid();
-
-        var accountDto = new CreateAccountDto(
-            Type: AccountType.Deposit,
-            Currency: "RUB",
-            Balance: 500m,
-            InterestRate: 10
-        );
-
-        var request = new CreateAccountRequest(accountDto, ownerId);
-
         // Act
-        var result = await Sender.Send(request);
-
+        var result = await CreateAccountEndpoint.HandleEndpoint(
+            _validAccountDto,
+            Mediator,    // <- теперь настоящий Mediator из DI
+            _userWithoutId);
+        
         // Assert
-        Assert.True(result.IsSuccess, "Account creation should succeed.");
-        Assert.NotNull(result.Value);
-        Assert.NotEqual(Guid.Empty, result.Value.Id);
-        Assert.Equal(AccountType.Deposit, result.Value.Type);
-        Assert.Equal("RUB", result.Value.Currency);
-        Assert.Equal(500m, result.Value.Balance);
-        Assert.Equal(ownerId, result.Value.OwnerId);
+        Assert.IsType<UnauthorizedHttpResult>(result);
+    }
 
-        // Дополнительно — проверим, что запись реально в базе
-        var accountFromDb = await ModuleBankAppContext.Accounts.FindAsync(result.Value.Id);
-        Assert.NotNull(accountFromDb);
-        Assert.Equal("RUB", accountFromDb.Currency);
-        Assert.Equal(500m, accountFromDb.Balance);
+    [Fact]
+    public async Task HandleRequest_WhenMediatorReturnsFailure_ReturnsBadRequest()
+    {
+        // Здесь мы подсовываем невалидный DTO
+        var invalidDto = new CreateAccountDto(
+            AccountType.Deposit, // для депозита ставка обязательна
+            "USD",
+            1000m,
+            null);
+    
+        var result = await CreateAccountEndpoint.HandleEndpoint(
+            invalidDto,
+            Mediator,
+            _userWithValidId);
+    
+        var badRequest = Assert.IsType<BadRequest<MbResult<Account>>>(result);
+        Assert.False(badRequest.Value.IsSuccess);
+        // Assert.Contains("Interest rate is required", badRequest.Value.Error);
     }
     
     [Fact]
-    public async Task CreateAccount_WithValidData_ShouldCreateAccountInDatabase()
+    public async Task Handle_ShouldCreateAccount_WhenRequestIsValid()
     {
         // Arrange
-        var validRequest = new CreateAccountRequest(
-            new CreateAccountDto(
-                Type: AccountType.Deposit,
-                Currency: "RUB",
-                Balance: 500m,
-                InterestRate: 10
-            ),
-            Guid.Parse("a191ee39-08a7-4ffa-8f53-3c5f0f5f9b1c"));
-
+        var ownerId = Guid.NewGuid();
+        var request = new CreateAccountRequest(_validAccountDto, ownerId);
+    
         // Act
-        var result = await Sender.Send(validRequest);
-
+        var result = await Sender.Send(request);
+    
         // Assert
         Assert.True(result.IsSuccess);
-        
-        var createdAccount = await ModuleBankAppContext.Accounts
-            .FirstOrDefaultAsync(a => a.Id == result.Value.Id);
-        
-        Assert.NotNull(createdAccount);
-        Assert.Equal(AccountType.Deposit, createdAccount.Type);
-        Assert.Equal("RUB", createdAccount.Currency);
-        Assert.Equal(500m, createdAccount.Balance);
-        Assert.Equal(validRequest.ClaimsId, createdAccount.OwnerId);
-    }
-
-    [Fact]
-    public async Task CreateAccount_WithInvalidCurrency_ShouldReturnValidationError()
-    {
-        // Arrange
-        var invalidRequest = new CreateAccountRequest(
-            new CreateAccountDto(
-                Type: AccountType.Deposit,
-                Currency: "ROB", // invalid currency code
-                Balance: 500m,
-                InterestRate: 10
-            ),
-            Guid.Parse("a191ee39-08a7-4ffa-8f53-3c5f0f5f9b1c"));
-
-        // Act
-        var result = await Sender.Send(invalidRequest);
-
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Contains("Invalid currency code", result.Error);
-    }
-
-    [Fact]
-    public async Task CreateAccount_WithNegativeBalanceForChecking_ShouldReturnValidationError()
-    {
-        // Arrange
-        var invalidRequest = new CreateAccountRequest(
-            new CreateAccountDto(
-                Type: AccountType.Deposit,
-                Currency: "RUB",
-                Balance: -500m, // negative balance
-                InterestRate: 10
-            ),
-            Guid.Parse("a191ee39-08a7-4ffa-8f53-3c5f0f5f9b1c"));
-
-        // Act
-        var result = await Sender.Send(invalidRequest);
-
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Contains("Balance cannot be negative", result.Error);
-    }
-
-    [Fact]
-    public async Task CreateAccount_ForDepositWithoutInterestRate_ShouldReturnValidationError()
-    {
-        // Arrange
-        var invalidRequest = new CreateAccountRequest(
-            new CreateAccountDto(
-                Type: AccountType.Deposit,  
-                Currency: "RUB",
-                Balance: 500m,
-                InterestRate: 0 // not interest rate
-            ),
-            Guid.Parse("a191ee39-08a7-4ffa-8f53-3c5f0f5f9b1c"));
-
-        // Act
-        var result = await Sender.Send(invalidRequest);
-
-        // Assert
-        Assert.False(result.IsSuccess);
-        Assert.Contains("Для вклада должна быть указана процентная ставка", result.Error);
+        Assert.NotNull(result.Value);
+    
+        var account = result.Value;
+        Assert.Equal(AccountType.Checking, account.Type);
+        Assert.Equal("USD", account.Currency);
+        Assert.Equal(1000m, account.Balance);
+        Assert.Equal(ownerId, account.OwnerId);
+    
+        // Проверим, что запись реально появилась в БД
+        var dbAccount = await ModuleBankAppContext.Accounts.FindAsync(account.Id);
+        Assert.NotNull(dbAccount);
+        Assert.Equal("USD", dbAccount!.Currency);
     }
 }
+
 

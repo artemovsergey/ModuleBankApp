@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc.Testing;
-using ModuleBankApp.API.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +7,9 @@ using System.Threading.Tasks;
 using Hangfire;
 using Hangfire.PostgreSql;
 using ModuleBankApp.API.Infrastructure.Data;
+using ModuleBankApp.API.Infrastructure.Messaging.Options;
 using Testcontainers.PostgreSql;
+using Testcontainers.RabbitMq;
 using Xunit;
 
 namespace ModuleBankApp.Tests.Integration;
@@ -18,21 +19,30 @@ public sealed class IntegrationTestApplicationFactory : WebApplicationFactory<Pr
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres:latest")
+        .WithName("postgres_container_name")
         .WithDatabase("testdb")
         .WithUsername("postgres")
         .WithPassword("root")
         .Build();
-    
-    public Task InitializeAsync()
+
+    private readonly RabbitMqContainer _rabbitMqContainer = new RabbitMqBuilder()
+        .WithImage("rabbitmq:3.12-management")
+        .WithName("rabbitmq_container_name")
+        .WithHostname("rabbitmq_test")
+        .Build();
+
+    public async Task InitializeAsync()
     {
-        return _dbContainer.StartAsync();
+        await _dbContainer.StartAsync();
+        await _rabbitMqContainer.StartAsync();
     }
 
-    public new Task DisposeAsync()
+    public new async Task DisposeAsync()
     {
-        return _dbContainer.StopAsync();
+        await _dbContainer.StopAsync();
+        await _rabbitMqContainer.StopAsync();
     }
-    
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
@@ -45,7 +55,7 @@ public sealed class IntegrationTestApplicationFactory : WebApplicationFactory<Pr
             services.AddDbContext<ModuleBankAppContext>(options =>
                 options.UseNpgsql(_dbContainer.GetConnectionString()));
 
-            var hangfireDescriptor = services.FirstOrDefault(d => 
+            var hangfireDescriptor = services.FirstOrDefault(d =>
                 d.ServiceType == typeof(JobStorage));
             if (hangfireDescriptor != null)
             {
@@ -57,7 +67,17 @@ public sealed class IntegrationTestApplicationFactory : WebApplicationFactory<Pr
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(_dbContainer.GetConnectionString())));
-            
+
+            services.Configure<EventBusOptions>(o =>
+            {
+                o.HostName = _rabbitMqContainer.Hostname;
+                    //o.Port = _rabbitMqContainer.GetMappedPublicPort(5672);
+                o.VirtualHost = "/";
+                o.ExchangeName = "account.events";
+                o.UserName = "guest";
+                o.Password = "guest";
+            });
+
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ModuleBankAppContext>();
@@ -66,4 +86,3 @@ public sealed class IntegrationTestApplicationFactory : WebApplicationFactory<Pr
         });
     }
 }
-

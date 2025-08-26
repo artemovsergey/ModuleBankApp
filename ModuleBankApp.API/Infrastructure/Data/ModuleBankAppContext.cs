@@ -11,9 +11,10 @@ public class ModuleBankAppContext : DbContext
     public DbSet<Transaction> Transactions { get; set; }
     public DbSet<OutboxMessage> Outbox => Set<OutboxMessage>();
     public DbSet<InboxMessage> Inbox => Set<InboxMessage>();
-    
     public DbSet<AuditMessage> Audit => Set<AuditMessage>();
-
+    
+    public DbSet<InboxErrorLetter> InboxErrorLetters => Set<InboxErrorLetter>();
+    
     public ModuleBankAppContext(DbContextOptions<ModuleBankAppContext> opt)
         : base(opt)
     {
@@ -54,6 +55,17 @@ public class ModuleBankAppContext : DbContext
             eb.Property(x => x.Payload).IsRequired().HasColumnType("jsonb");
             eb.Property(x => x.ReceivedAtUtc);
         });
+        
+        modelBuilder.Entity<InboxErrorLetter>(eb =>
+        {
+            eb.ToTable("inbox_error_letters");
+            eb.HasKey(x => x.Id);
+            eb.Property(x => x.Handler).HasMaxLength(512);
+            eb.Property(x => x.Error).HasMaxLength(512);
+            eb.Property(x => x.Payload).IsRequired().HasColumnType("jsonb");
+            eb.Property(x => x.ReceivedAtUtc);
+        });
+        
         
         modelBuilder.Entity<AuditMessage>(eb =>
         {

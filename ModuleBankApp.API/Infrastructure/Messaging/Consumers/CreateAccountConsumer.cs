@@ -31,8 +31,32 @@ public class CreateAccountConsumer(
                 
                 if (envelope is null)
                 {
+                    
+                    await ConsumerBase.MoveToErrorLetterAsync(
+                        scopeFactory,
+                        handler: nameof(CreateAccountConsumer),
+                        payload: message,
+                        error: "Envelope deserialization failed",
+                        log,
+                        stoppingToken);
+                    
                     log.LogWarning("Не удалось десериализовать сообщение: {Message}", message);
-                    await channel.BasicAckAsync(ea.DeliveryTag, false);
+                    await channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
+                    return;
+                }
+                
+                // Проверка версии
+                if (envelope.Meta.Version != "v1")
+                {
+                    await ConsumerBase.MoveToErrorLetterAsync(
+                        scopeFactory,
+                        handler: nameof(CreateAccountConsumer),
+                        payload: message,
+                        error: $"Unsupported version: {envelope.Meta.Version}",
+                        log,
+                        stoppingToken);
+
+                    await channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
                     return;
                 }
                 
